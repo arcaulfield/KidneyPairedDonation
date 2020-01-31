@@ -21,7 +21,7 @@ class Market:
         self.graph = nx.DiGraph()
         self.participants = list()
         for (recipient, donor) in pairs:
-            self.add_pair(recipient, donor)
+            self.add_pair((recipient, donor))
 
     def add_participant(self, participant):
         """
@@ -91,16 +91,17 @@ class Market:
         nx.draw_networkx(self.graph, pos=graph_pos, with_labels=True, node_size=1000, node_color=colours, labels=my_labels,
                          font_size=7.5, font_weight='bold')
 
-    def add_pair(self, recipient, donor):
+    def add_pair(self, pair):
         """
         adds a patient-donor pair to the market
+        pair is a tuple in the form (recipient, participant)
         :param recipient: Participant - the recipient of the patient-donor pair
         :param donor: Participant - the donor of the patient-donor pair
         """
-        recipient.add_neighbour(donor)
-        self.add_participant(donor)
-        self.add_participant(recipient)
-        self.graph.add_weighted_edges_from([(recipient, donor, 1)])
+        pair[0].add_neighbour(pair[1])
+        self.add_participant(pair[1])
+        self.add_participant(pair[0])
+        self.graph.add_weighted_edges_from([(pair[0], pair[1], 1)])
 
     def get_adj_list(self):
         """
