@@ -1,12 +1,11 @@
-import participant as Participant
 import market as Market
-import hungarian_algorithm as HA
+from algorithm import hungarian_algorithm as HA
 import networkx as nx
 
 
 class MaxMatching:
     """
-    Finds maximum weight matching in a kidney exchange market
+    Finds maximum weight matching in a kidney exchange market, useing the hungarian algorithm
     The kidney exchange market is represented as a bipartite graph
     """
 
