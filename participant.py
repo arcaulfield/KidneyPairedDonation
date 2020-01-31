@@ -65,18 +65,20 @@ class Participant:
         """
         checks if this Participant is blood-type and tissue-type compatible with the participant
         :param participant: Participant
-        :return: a boolean indicating whether or not
+        :return: a boolean. True if this participant is compatible with the participant
         """
         if self.recipient:
-            if self.blood_type == 'X':
+            if self.blood_type == 'X' and participant.partner.blood_type == 'X':
+                return False
+            elif self.blood_type == 'X':
                 return True
-            if self.blood_type == participant.blood_type or self.blood_type == 'AB' or participant.blood_type == 'O':
+            elif self.blood_type == participant.blood_type or self.blood_type == 'AB' or participant.blood_type == 'O':
                 return random.choice([False, True], p=[self.cpra, 1 - self.cpra])
         else:
             # checks if you are an altruistic donor - altruistic donors can't have dummy nodes as neighbours
             if participant.blood_type == 'X' and self.partner.blood_type == 'X':
                 return False
-            if participant.blood_type == 'X':
+            elif participant.blood_type == 'X':
                 return True
             elif self.blood_type == participant.blood_type or participant.blood_type == 'AB' or self.blood_type == 'O':
                 return random.choice([False, True], p=[participant.cpra, 1 - participant.cpra])
