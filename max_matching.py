@@ -6,16 +6,20 @@ import networkx as nx
 
 class MaxMatching:
     """
-    Finds maximum matching using a bipartite graph
+    Finds maximum weight matching in a kidney exchange market
+    The kidney exchange market is represented as a bipartite graph
     """
 
     def __init__(self, pairs):
+        """
+        :param pairs: a list of tuples of Participants in the form (recipient, donor)
+        """
         self.bigraph = Market.Market(pairs)
 
     def update_market(self, add_pairs, remove_participants):
         """
         Updates the kidney exchange market
-        :param add_pairs: a list of tuples of participants in the form (recipient, donor)
+        :param add_pairs: a list of tuples of Participants in the form (recipient, donor)
         :param remove_participants: a list participants to remove from the market
         """
         for pair in add_pairs:
@@ -25,7 +29,6 @@ class MaxMatching:
 
     def maximum_matching(self):
         """
-        :param pair_list: a list of patient donor pairs
         :return: a set of all the edges in the matching
         """
         edges = set()
