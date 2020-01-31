@@ -51,7 +51,8 @@ class Participant:
         Adds a neighbour to the participant
         :param neighbour: a Participant
         """
-        self.neighbours.append(neighbour)
+        if not (neighbour in self.neighbours):
+            self.neighbours.append(neighbour)
 
     def remove_neighbour(self, neighbour):
         """
