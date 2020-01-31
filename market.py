@@ -1,6 +1,4 @@
-from participant import Participant
 import networkx as nx
-from networkx.algorithms import bipartite
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -102,6 +100,8 @@ class Market:
         self.add_participant(pair[1])
         self.add_participant(pair[0])
         self.graph.add_weighted_edges_from([(pair[0], pair[1], 1)])
+        pair[0].partner = pair[1]
+        pair[1].partner = pair[0]
 
     def get_adj_list(self):
         """
