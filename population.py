@@ -1,6 +1,6 @@
 from participant import Participant
 import numpy.random as random
-from config import PER_A, PER_B, PER_AB, PER_O, PER_CPRA, CPRA, TIME_TO_CRITICAL, ALT_WEIGHT, START_SIZE, ARRIVAL_RATE
+from config import PER_A, PER_B, PER_AB, PER_O, PER_CPRA, CPRA, TIME_TO_CRITICAL, ALT_WEIGHT, ARRIVAL_RATE
 
 
 class Population:

@@ -1,20 +1,32 @@
-from participant import Participant
 from market import Market
 from population import Population
-from config import ARRIVAL_RATE, START_SIZE, PERIOD_LENGTH, NUM_PERIODS
-from market_metrics import Metrics
-import numpy.random as random
+from config import START_SIZE, NUM_PERIODS
 
 
 class Simulations:
-
-    def __init__(self, altruists=3, per_period=1):
+    """
+    Initializes and runs simulations, with a certain number of altruists and participants
+    ----------
+    population: Population
+        a population from which new participants are created
+    altruists: int
+        the number of altruists that enter the market every "per_period" periods
+    per_period: int
+        altruists enter the market every "per_period"
+    market: Market
+        the kidney exchange market that we run simulations on
+    """
+    def __init__(self, altruists, per_period):
         self.population = Population()
         self.altruists = altruists
         self.per_period = per_period
         self.market = Market(self.population.generate_pairs(START_SIZE), self.altruists, self.per_period)
 
     def run(self):
+        """
+        runs the simulations
+        adds participants every matching period and adds altruists depending on settings
+        """
         for i in range(NUM_PERIODS):
             print("Starting period " + str(i))
             new_pairs = self.population.generate_pairs(self.population.gen_rand_population_size())
@@ -26,7 +38,3 @@ class Simulations:
                                    new_altruists=altruists)
         self.market.metrics.close_table()
 
-
-if __name__ == "__main__":
-    s = Simulations()
-    s.run()
