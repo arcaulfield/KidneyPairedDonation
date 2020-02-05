@@ -22,3 +22,7 @@ TIME_TO_CRITICAL = 80
 
 # the edge weight to give an altruistic donor
 ALT_WEIGHT = -6
+
+# length of a period of a matching cycle (in months)
+PERIOD_LENGTH = 4
+

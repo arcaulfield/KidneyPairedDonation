@@ -9,11 +9,11 @@ class MaxMatching:
     The kidney exchange market is represented as a bipartite graph
     """
 
-    def __init__(self, pairs):
+    def __init__(self, market):
         """
-        :param pairs: a list of tuples of Participants in the form (recipient, donor)
+        :param market: a Market instance which is a kidney exchange market
         """
-        self.bigraph = Market.Market(pairs)
+        self.bigraph = market
 
     def update_market(self, add_pairs, remove_participants):
         """
@@ -63,6 +63,7 @@ class MaxMatching:
             matrix[(n * 2) + 1][(n*2)] = 1
             matrix[(n * 2)][n * 2 + 1] = 1
         matching = HA.max_weight_matching(matrix)
+        # WHY DO WE DO THIS???
         if matching[2] <= (len(self.bigraph.participants) / 2):
             return edges
         else:
@@ -70,8 +71,8 @@ class MaxMatching:
             for p in matching[0].keys():
                 participant1 = participant_list[p]
                 participant2 = participant_list[matching[0][p]]
-                if not (participant1.pair == participant2.pair):
-                    edge = (participant1.pair, participant2.pair)
+                if not (participant1.partner == participant2):
+                    edge = (participant1, participant2)
                     edges.add(edge)
             return edges
 
