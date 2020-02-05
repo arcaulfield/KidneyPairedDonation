@@ -36,7 +36,7 @@ class Metrics:
         self.period_num = 0
         # self.market = market
         # Create an new Excel file and add a worksheet.
-        results_file_path = os.path.join(RESULTS_PATH, str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "periods.xlsx")
+        results_file_path = os.path.join(RESULTS_PATH, str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods.xlsx")
         self.workbook = xlsxwriter.Workbook(results_file_path)
         self.worksheet = self.workbook.add_worksheet()
         self.initialize_table()
@@ -154,13 +154,13 @@ class Metrics:
         # Add a bold format to use to highlight cells.
         self.total_num_matched = self.total_num_matched + num_matches
         if self.total_num_participants == 0:
-            self.total_num_participants = num_participants
+            self.total_num_participants = num_participants/2
         else:
             self.total_num_participants = self.total_num_participants + num_added
         # Write some numbers, with row/column notation.
         self.worksheet.write(self.period_num, 0, self.period_num)
         self.worksheet.write(self.period_num, 1, num_matches)
-        self.worksheet.write(self.period_num, 2, num_participants)
+        self.worksheet.write(self.period_num, 2, num_participants/2 - num_altruists_in_market)
         self.worksheet.write(self.period_num, 3, self.total_num_participants)
         self.worksheet.write(self.period_num, 4, self.total_num_matched)
         self.worksheet.write(self.period_num, 5, self.donor_o_patient_a)

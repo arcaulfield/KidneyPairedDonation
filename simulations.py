@@ -1,6 +1,7 @@
 from market import Market
 from population import Population
-from config import START_SIZE, NUM_PERIODS
+from config import START_SIZE, NUM_PERIODS, ARRIVAL_RATE
+import testaltruists as ta
 
 
 class Simulations:
@@ -29,7 +30,7 @@ class Simulations:
         """
         for i in range(NUM_PERIODS):
             print("Starting period " + str(i))
-            new_pairs = self.population.generate_pairs(self.population.gen_rand_population_size())
+            new_pairs = self.population.generate_pairs(ARRIVAL_RATE)
             altruists = list()
             if i % self.per_period == 0:
                 for j in range(self.altruists):
@@ -38,3 +39,6 @@ class Simulations:
                                    new_altruists=altruists)
         self.market.metrics.close_table()
 
+
+if __name__ == '__main__':
+    ta.test_altruists()
