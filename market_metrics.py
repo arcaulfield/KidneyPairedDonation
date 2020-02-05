@@ -7,8 +7,9 @@ class Metrics:
     Stores all the metrics to track a market. Has all the functionality necessary for writing to excel files.
     In particular, writes to tables based on results.
     """
-    def __init__(self, num_altruists):
+    def __init__(self, num_altruists, per_period):
         self.num_altruists = num_altruists
+        self.per_period = per_period
         self.donor_o_patient_o = 0
         self.donor_a_patient_o = 0
         self.donor_b_patient_o = 0
@@ -35,7 +36,7 @@ class Metrics:
         self.period_num = 0
         # self.market = market
         # Create an new Excel file and add a worksheet.
-        results_file_path = os.path.join(RESULTS_PATH, "altruists" + str(self.num_altruists) + ".xlsx")
+        results_file_path = os.path.join(RESULTS_PATH, str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "periods.xlsx")
         self.workbook = xlsxwriter.Workbook(results_file_path)
         self.worksheet = self.workbook.add_worksheet()
         self.initialize_table()
@@ -46,6 +47,9 @@ class Metrics:
         :param pair: a tuple of Participants, in the form (recipient, donor) a patient-donor pair that we are adding/removing
         :param remove: false if adding to the market, true if removing from the market
         """
+        # don't log altruist blood types here
+        if pair[0].blood_type == 'X':
+            return
         if remove:
             var = -1
         else:
@@ -93,6 +97,8 @@ class Metrics:
         :param pair: a tuple of participants, in the form (recipient, donor) patient-donor pair that we are adding/removing
         :param remove: false if adding to the market, true if removing from the market
         """
+        if pair[0].blood_type == 'X':
+            return
         if remove:
             var = -1
         else:
@@ -108,7 +114,7 @@ class Metrics:
 
     def initialize_table(self):
         # Widen the first column to make the text clearer.
-        self.worksheet.set_column('A:Y', 20)
+        self.worksheet.set_column('A:AA', 20)
 
         # Add a bold format to use to highlight cells.
         bold = self.workbook.add_format({'bold': True})
@@ -140,12 +146,17 @@ class Metrics:
         self.worksheet.write('W1', 'Current # CPRA: ' + str(CPRA[1]), bold)
         self.worksheet.write('X1', 'Current # CPRA: ' + str(CPRA[2]), bold)
         self.worksheet.write('Y1', 'Current # CPRA: ' + str(CPRA[3]), bold)
+        self.worksheet.write('Z1', 'Num Altruists in Market', bold)
+        self.worksheet.write('AA1', 'Num Altruists in Matching', bold)
 
-    def update_table(self, num_matches, num_participants):
+    def update_table(self, num_matches, num_participants, num_added, num_altruists_in_market, num_altruists_in_matching):
         self.period_num = self.period_num + 1
         # Add a bold format to use to highlight cells.
         self.total_num_matched = self.total_num_matched + num_matches
-        self.total_num_participants = self.total_num_participants + num_participants
+        if self.total_num_participants == 0:
+            self.total_num_participants = num_participants
+        else:
+            self.total_num_participants = self.total_num_participants + num_added
         # Write some numbers, with row/column notation.
         self.worksheet.write(self.period_num, 0, self.period_num)
         self.worksheet.write(self.period_num, 1, num_matches)
@@ -172,6 +183,9 @@ class Metrics:
         self.worksheet.write(self.period_num, 22, self.cpra_2)
         self.worksheet.write(self.period_num, 23, self.cpra_3)
         self.worksheet.write(self.period_num, 24, self.cpra_4)
+        self.worksheet.write(self.period_num, 25, num_altruists_in_market)
+        self.worksheet.write(self.period_num, 26, num_altruists_in_matching)
+
     def close_table(self):
         self.workbook.close()
 

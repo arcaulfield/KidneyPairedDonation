@@ -23,8 +23,16 @@ TIME_TO_CRITICAL = 80
 # the edge weight to give an altruistic donor
 ALT_WEIGHT = -6
 
-# length of a period of a matching cycle (in months)
-PERIOD_LENGTH = 4
+# boolean indicating whether or not to take in account perishing
+PERISH = False
+
 
 ### File IO ###
 RESULTS_PATH = "results"
+
+### Simulation stats ###
+ARRIVAL_RATE = 4
+START_SIZE = 4
+# length of a period of a matching cycle (in months)
+PERIOD_LENGTH = 4
+NUM_PERIODS = 10

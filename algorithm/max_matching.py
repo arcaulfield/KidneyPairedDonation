@@ -15,17 +15,6 @@ class MaxMatching:
         """
         self.bigraph = market
 
-    def update_market(self, add_pairs, remove_participants):
-        """
-        Updates the kidney exchange market
-        :param add_pairs: a list of tuples of Participants in the form (recipient, donor)
-        :param remove_participants: a list participants to remove from the market
-        """
-        for pair in add_pairs:
-            self.bigraph.add_pair(pair)
-        for participant in remove_participants:
-            self.bigraph.remove_participant(participant)
-
     def maximum_matching(self):
         """
         :return: a set of all the edges in the matching
@@ -45,14 +34,6 @@ class MaxMatching:
                 if participant in new_graph.nodes():
                     new_graph.remove_node(participant)
                 participant_list.remove(participant)
-            # elif participant.recipient and len(participant.pair.donors) == 0:
-            #     if participant in participant_list:
-            #         for donor in participant.neighbours:
-            #             if donor in new_graph.nodes():
-            #                 new_graph.remove_node(donor)
-            #             participant_list.remove(donor)
-            #         new_graph.remove_node(participant)
-            #         participant_list.remove(participant)
         if len(participant_list) == 0:
             return edges
         matrix = (nx.adjacency_matrix(new_graph)).todense().tolist()

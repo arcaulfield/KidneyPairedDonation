@@ -1,6 +1,6 @@
 from participant import Participant
 import numpy.random as random
-from config import PER_A, PER_B, PER_AB, PER_O, PER_CPRA, CPRA, TIME_TO_CRITICAL, ALT_WEIGHT
+from config import PER_A, PER_B, PER_AB, PER_O, PER_CPRA, CPRA, TIME_TO_CRITICAL, ALT_WEIGHT, START_SIZE, ARRIVAL_RATE
 
 
 class Population:
@@ -11,8 +11,7 @@ class Population:
         count that keeps track of how many pairs have entered the market and ensures that each pair is given a unique id
     """
 
-    def __init__(self, arrival_rate=40):
-        self.arrival_rate = arrival_rate
+    def __init__(self):
         self.count = 0
 
     def generate_pairs(self, num_pairs):
@@ -50,8 +49,8 @@ class Population:
         gets a random population size centered around the arrival rate
         :return: integer representing a population size
         """
-        difference = int(float(self.arrival_rate) / 3.0)
-        return random.choice([self.arrival_rate - (difference * 2), self.arrival_rate - difference, self.arrival_rate, self.arrival_rate + difference, self.arrival_rate + (difference * 2)], p=[0.1, 0.2, 0.4, 0.2, 0.1])
+        difference = int(float(ARRIVAL_RATE) / 3.0)
+        return random.choice([ARRIVAL_RATE - (difference * 2), ARRIVAL_RATE - difference, ARRIVAL_RATE, ARRIVAL_RATE + difference, ARRIVAL_RATE + (difference * 2)], p=[0.1, 0.2, 0.4, 0.2, 0.1])
 
     def generate_altruist(self):
         """

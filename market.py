@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-from config import PERIOD_LENGTH
+from config import PERIOD_LENGTH, PERISH
 import algorithm.max_matching as mm
 import market_metrics as met
 
@@ -12,18 +12,24 @@ class Market:
     Participants are the nodes of the graph and edges represent potential kidney exchanges
     Attributes
     ----------
-    participants: list<participant>
+    participants: list<(Participant, Participant)>
         a list of all the participants in the market
     graph: Digraph
         a networkx directed graph
+    metrics: Metrics
+        a Metrics instance, which tracks all the stats for the market
+    altruists: list<(Participant, Participant)>
+        a list of all the altruists in the market
     """
 
-    def __init__(self, pairs, num_altruists):
+    def __init__(self, pairs, num_altruists, per_period):
         self.graph = nx.DiGraph()
         self.participants = list()
-        self.metrics = met.Metrics(num_altruists=num_altruists)
+        self.metrics = met.Metrics(num_altruists=num_altruists, per_period=per_period)
         for (recipient, donor) in pairs:
             self.add_pair((recipient, donor))
+        self.altruists = list()
+        self.num_added = 0
 
     def add_participant(self, participant):
         """
@@ -61,19 +67,28 @@ class Market:
         removes a participant from the market
         :param participant: a participant to remove from the market
         """
+        # avoid removing a participant more than once
+        if participant not in self.participants:
+            return
         if participant.donor:
             # only update metrics for donors, so we don't update more than once
-            self.metrics.update_blood_type_composition((participant, participant.partner), remove=True)
-            self.metrics.update_cpra_composition((participant, participant.partner), remove=True)
+            self.metrics.update_blood_type_composition((participant.partner, participant), remove=True)
+            self.metrics.update_cpra_composition((participant.partner, participant), remove=True)
             for p in self.participants:
                 if p.recipient and p.compatible(participant):
                     participant.remove_neighbour(p)
+            if (participant.partner, participant) in self.altruists:
+                self.altruists.remove((participant.partner, participant))
         else:
             for p in self.participants:
                 if p.donor and participant.compatible(p):
                     p.remove_neighbour(participant)
+            if (participant, participant.partner) in self.altruists:
+                self.altruists.remove((participant, participant.partner))
         if participant in self.graph.nodes():
             self.graph.remove_node(participant)
+        self.participants.remove(participant)
+
 
     def draw_market(self):
         if len(self.graph.nodes()) > 0:
@@ -147,8 +162,7 @@ class Market:
             if p.time_in_market >= p.time_to_critical:
                 perished.append(p)
         for p in perished:
-            if p in participants:
-                self.participants.remove(p)
+            self.remove_participant(p)
 
     def update(self, added_pairs=list(), matched_pairs=list(), altruists=list()):
         """
@@ -160,7 +174,8 @@ class Market:
         """
         for p in self.participants:
             p.time_in_market = p.time_in_market + PERIOD_LENGTH
-        self.remove_perished()
+        if PERISH:
+            self.remove_perished()
         for pair in added_pairs:
             self.add_pair(pair)
         for pair in matched_pairs:
@@ -168,6 +183,7 @@ class Market:
             self.remove_participant(pair[1])
         for a in altruists:
             self.add_pair(a)
+            self.altruists.append(a)
 
     def run_period(self, new_participants=list(), new_altruists=list()):
         """
@@ -175,11 +191,15 @@ class Market:
         Updates the market at the end of the period
         :param new_participants: the new agents to add to the market at the end of the matching
         """
-        """
-        RUN MATCHING ALGORITHM
-        """
+        # Run matching algorithm
         bigraph = mm.MaxMatching(self)
         matches = bigraph.maximum_matching()
-        self.metrics.update_table(num_matches=len(matches), num_participants=len(self.participants))
+        num_altruists_in_matching = 0
+        # Count how many altruists are in the matching
+        for match in matches:
+            if match[1].blood_type == 'X':
+                num_altruists_in_matching += 1
+        self.metrics.update_table(num_matches=len(matches), num_participants=len(self.participants), num_added=self.num_added, num_altruists_in_market=len(self.altruists), num_altruists_in_matching=num_altruists_in_matching)
         self.update(added_pairs=new_participants, matched_pairs=matches, altruists=new_altruists)
+        self.num_added = len(new_participants)
 
