@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from config import PERIOD_LENGTH
 import algorithm.max_matching as mm
+import market_metrics as met
 
 
 class Market:
@@ -17,9 +18,10 @@ class Market:
         a networkx directed graph
     """
 
-    def __init__(self, pairs):
+    def __init__(self, pairs, num_altruists):
         self.graph = nx.DiGraph()
         self.participants = list()
+        self.metrics = met.Metrics(num_altruists=num_altruists)
         for (recipient, donor) in pairs:
             self.add_pair((recipient, donor))
 
@@ -60,12 +62,15 @@ class Market:
         :param participant: a participant to remove from the market
         """
         if participant.donor:
+            # only update metrics for donors, so we don't update more than once
+            self.metrics.update_blood_type_composition((participant, participant.partner), remove=True)
+            self.metrics.update_cpra_composition((participant, participant.partner), remove=True)
             for p in self.participants:
-                if p.recipient and p.abo_compatible(participant):
+                if p.recipient and p.compatible(participant):
                     participant.remove_neighbour(p)
         else:
             for p in self.participants:
-                if p.donor and participant.abo_compatible(p):
+                if p.donor and participant.compatible(p):
                     p.remove_neighbour(participant)
         if participant in self.graph.nodes():
             self.graph.remove_node(participant)
@@ -99,11 +104,13 @@ class Market:
         :param donor: Participant - the donor of the patient-donor pair
         """
         pair[0].add_neighbour(pair[1])
+        pair[0].partner = pair[1]
+        pair[1].partner = pair[0]
         self.add_participant(pair[1])
         self.add_participant(pair[0])
         self.graph.add_weighted_edges_from([(pair[0], pair[1], 1)])
-        pair[0].partner = pair[1]
-        pair[1].partner = pair[0]
+        self.metrics.update_blood_type_composition(pair, remove=False)
+        self.metrics.update_cpra_composition(pair, remove=False)
 
     def get_adj_list(self):
         """
@@ -162,78 +169,17 @@ class Market:
         for a in altruists:
             self.add_pair(a)
 
-    def run_period(self, verbose=True, new_participants=list(), new_altruists=list()):
+    def run_period(self, new_participants=list(), new_altruists=list()):
         """
         Runs the matching algorithm for one period
         Updates the market at the end of the period
-        :param algorithm: the algorithm to use for the matching
-        :param verbose: a boolean indicating whether or not to print relevant information
-        :param new_agents: the new agents to add to the market at the end of the matching
+        :param new_participants: the new agents to add to the market at the end of the matching
         """
-        # if verbose:
-        #     print("\n\n----------------Update----------------")
-        #     print("Time in market: ", self.time)
-        #     print("Total number of pairs that have entered the market: ",
-        #           self.total_agents)
-        #     print("Total number of pairs that have perished: ", len(self.perished))
-        #     print("Total number of matched pairs: ", len(self.matched))
-        #     print("Total number of agents currently in the market: ", len(self.pairs))
-        #     print("Current pairs ", [a.id_num for a in self.pairs])
-
-        # plt.clf()
-        # plt.axis('off')
-        # if len(self.Graph.nodes()) > 0:
-        #     self.graph_pos = nx.spring_layout(self.Graph, k=(1 / (0.9 * np.sqrt(len(
-        #         self.Graph.nodes())))))
-        # else:
-        #     self.graph_pos = nx.spring_layout(self.Graph, k=0)
-        # my_labels = {}
-        # colours = list()
-        # for pair in self.pairs:
-        #     my_labels[pair] = pair.recipient_type + ', ' + pair.donor_type
-        #     if pair.recipient_type == 'X':
-        #         colours.append('w')
-        #     elif pair.cpra == 0:
-        #         colours.append('b')
-        #     elif pair.cpra == 0.25:
-        #         colours.append('g')
-        #     elif pair.cpra == 0.75:
-        #         colours.append('y')
-        #     else:
-        #         colours.append('r')
-        # for altruist in self.altruists:
-        #     my_labels[altruist] = altruist.donor_type
-        #     colours.append('b')
-        # nx.draw_networkx(self.Graph, pos=self.graph_pos, with_labels=True, node_size=1000, node_color=colours,
-        #                  labels=my_labels,
-        #                  font_size=7.5, font_weight='bold')
-
-        # plt.plot()
-        # plt.title("Period " + str(self.period_num) + "\nMatches " + str(len(self.matched)) + " || Perished " + str(
-        #   len(self.perished)))
-        # plt.show()
-        # plt.pause(self.plot_time)
-
-        if verbose:
-            print("Running matching algorithm")
         """
         RUN MATCHING ALGORITHM
         """
-
         bigraph = mm.MaxMatching(self)
         matches = bigraph.maximum_matching()
+        self.metrics.update_table(num_matches=len(matches), num_participants=len(self.participants))
+        self.update(added_pairs=new_participants, matched_pairs=matches, altruists=new_altruists)
 
-
-        matched_pairs = []
-        if verbose:
-            print("Matched " + str(len(matches)) + " pairs")
-        # self.total_matched += len(matches)
-        # colour the edges that we have matched
-
-        self.update(added_pairs=new_participants, matched_pairs=matched_pairs, altruists=new_altruists)
-        # bigraph.update_bigraph(add_pairs=new_agents, remove_pairs=matched_pairs)
-        # for perished in self.perished:
-        #   if perished in bigraph.bigraph.participants:
-        #      bigraph.update_bigraph(add_pairs=list(), remove_pairs=perished)
-        if verbose:
-            print("Added " + str(len(new_participants)) + " pairs to the market.")

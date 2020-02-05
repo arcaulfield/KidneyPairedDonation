@@ -42,17 +42,17 @@ class MaxMatching:
                         participant_list.remove(p1)
                 if to_remove is not None:
                     new_graph.remove_node(to_remove)
-                new_graph.remove_node(participant)
-                participant_list.remove(participant)
-            elif participant.recipient and len(participant.pair.donors) == 0:
-                if participant in participant_list:
-                    for donor in participant.neighbours:
-                        if donor in new_graph.nodes():
-                            new_graph.remove_node(donor)
-                        participant_list.remove(donor)
+                if participant in new_graph.nodes():
                     new_graph.remove_node(participant)
-                    participant_list.remove(participant)
-                # remove recipient
+                participant_list.remove(participant)
+            # elif participant.recipient and len(participant.pair.donors) == 0:
+            #     if participant in participant_list:
+            #         for donor in participant.neighbours:
+            #             if donor in new_graph.nodes():
+            #                 new_graph.remove_node(donor)
+            #             participant_list.remove(donor)
+            #         new_graph.remove_node(participant)
+            #         participant_list.remove(participant)
         if len(participant_list) == 0:
             return edges
         matrix = (nx.adjacency_matrix(new_graph)).todense().tolist()

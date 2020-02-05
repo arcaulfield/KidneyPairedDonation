@@ -26,3 +26,5 @@ ALT_WEIGHT = -6
 # length of a period of a matching cycle (in months)
 PERIOD_LENGTH = 4
 
+### File IO ###
+RESULTS_PATH = "results"
