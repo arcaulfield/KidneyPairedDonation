@@ -72,20 +72,5 @@ class Population:
         :return: a weight in the form of an int
         """
         weight = 2
-        if recipient_type == 'O':
-            weight = 50
-        elif donor_type == 'A':
-            weight = 40
-        elif recipient_type == 'B' or recipient_type =='A':
-            weight = 10
-        elif donor_type == 'AB':
-            if cpra == 0.97:
-                weight = 25
-            elif cpra == 0.75:
-                weight = 10
-            elif cpra == 0.25:
-                weight = 5
-            else:
-                weight = 2
         return weight
 

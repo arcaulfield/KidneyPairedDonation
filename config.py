@@ -12,12 +12,12 @@ PER_AB = 0.03
 PER_O = 0.46
 
 # percertage with each CPRA level
-PER_CPRA = [0.40, 0.35, 0.20, 0.05]
+PER_CPRA = [0.314, 0.266, 0.214, 0.206]
 # CPRA levels
 CPRA = [0, 0.25, 0.75, 0.97]
 
 # the edge weight to give an altruistic donor
-ALT_WEIGHT = -6
+ALT_WEIGHT = -2
 
 # boolean indicating whether or not to take in account perishing
 PERISH = False
@@ -28,8 +28,12 @@ TIME_TO_CRITICAL = 80
 RESULTS_PATH = "results"
 
 ### Simulation stats ###
-ARRIVAL_RATE = 4
-START_SIZE = 4
+ARRIVAL_RATE = 8
+START_SIZE = 100
 # length of a period of a matching cycle (in months)
 PERIOD_LENGTH = 4
-NUM_PERIODS = 3
+NUM_PERIODS = 200
+
+# matching algorithm used
+# either 'HA' for hungarian algorithm or 'LP' for linear program
+ALGORITHM = "HA"

@@ -1,6 +1,7 @@
 import xlsxwriter
 import os
-from config import RESULTS_PATH, CPRA
+from config import RESULTS_PATH, CPRA, ALGORITHM
+
 
 class Metrics:
     """
@@ -36,7 +37,7 @@ class Metrics:
         self.period_num = 0
         # self.market = market
         # Create an new Excel file and add a worksheet.
-        results_file_path = os.path.join(RESULTS_PATH, str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods.xlsx")
+        results_file_path = os.path.join(RESULTS_PATH, ALGORITHM + str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods.xlsx")
         self.workbook = xlsxwriter.Workbook(results_file_path)
         self.worksheet = self.workbook.add_worksheet()
         self.initialize_table()

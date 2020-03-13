@@ -1,11 +1,13 @@
 import market as Market
-from algorithm import hungarian_algorithm as HA
+from algorithms import hungarian_algorithm as HA
 import networkx as nx
+from config import ALGORITHM
+from algorithms.LP.linear_program import solve_KEP
 
 
 class MaxMatching:
     """
-    Finds maximum weight matching in a kidney exchange market, useing the hungarian algorithm
+    Finds maximum weight matching in a kidney exchange market, useing the hungarian algorithms
     The kidney exchange market is represented as a bipartite graph
     """
 
@@ -16,7 +18,14 @@ class MaxMatching:
         self.bigraph = market
 
     def maximum_matching(self):
+        if ALGORITHM == "HA":
+            return self.HA_maximum_matching
+        elif ALGORITHM == "LP":
+            return self.LP_maximum_matching
+
+    def HA_maximum_matching(self):
         """
+        finds matching using the hungarian algorithm
         :return: a set of all the edges in the matching
         """
         edges = set()
@@ -44,7 +53,6 @@ class MaxMatching:
             matrix[(n * 2) + 1][(n*2)] = 1
             matrix[(n * 2)][n * 2 + 1] = 1
         matching = HA.max_weight_matching(matrix)
-        # WHY DO WE DO THIS???
         if matching[2] <= (len(self.bigraph.participants) / 2):
             return edges
         else:
@@ -56,6 +64,45 @@ class MaxMatching:
                     edge = (participant1, participant2)
                     edges.add(edge)
             return edges
+
+    def LP_maximum_matching(self):
+        """
+        finds a matching using a linear program
+        :return: a set of all the edges in the matching
+        """
+        G, pair_dict = self.bigraph.get_adj_list()
+        altruist_list = self.bigraph.get_alt_list()
+        OPT, cpu_time, _, _, _, chains, cycles = solve_KEP(G, 3, 3, altruist_list)
+        edges = set()
+        for cycle in cycles:
+            for i in range(len(cycle) - 1):
+                pair1 = pair_dict[cycle[i]]
+                pair2 = pair_dict[cycle[i+1]]
+                edge1 = (pair1[0], pair1[1])
+                edge2 = (pair1[1], pair2[0])
+                edges.add(edge1)
+                edges.add(edge2)
+            pair1 = pair_dict[cycle[(len(cycle) - 1)]]
+            pair2 = pair_dict[cycle[0]]
+            edge1 = (pair1[0], pair1[1])
+            edge2 = (pair1[1], pair2[0])
+            edges.add(edge1)
+            edges.add(edge2)
+        for chain in chains:
+            for i in range(len(chain) - 1):
+                pair1 = pair_dict[chain[i]]
+                pair2 = pair_dict[chain[i + 1]]
+                edge1 = (pair1[0], pair1[1])
+                edge2 = (pair1[1], pair2[0])
+                edges.add(edge1)
+                edges.add(edge2)
+            pair1 = pair_dict[chain[(len(chain) - 1)]]
+            pair2 = pair_dict[chain[0]]
+            edge1 = (pair1[0], pair1[1])
+            edge2 = (pair1[1], pair2[0])
+            edges.add(edge1)
+            edges.add(edge2)
+        return edges
 
     def filter_matches(self, matches):
         """

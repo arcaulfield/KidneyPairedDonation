@@ -2,8 +2,10 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
 from config import PERIOD_LENGTH, PERISH
-import algorithm.max_matching as mm
+import algorithms.max_matching as mm
 import market_metrics as met
+
+
 
 
 class Market:
@@ -181,17 +183,19 @@ class Market:
         for pair in matched_pairs:
             self.remove_participant(pair[0])
             self.remove_participant(pair[1])
+            if pair in altruists:
+                self.altruists.remove(pair)
         for a in altruists:
             self.add_pair(a)
             self.altruists.append(a)
 
     def run_period(self, new_participants=list(), new_altruists=list()):
         """
-        Runs the matching algorithm for one period
+        Runs the matching algorithms for one period
         Updates the market at the end of the period
         :param new_participants: the new agents to add to the market at the end of the matching
         """
-        # Run matching algorithm
+        # Run matching algorithms
         bigraph = mm.MaxMatching(self)
         matches = bigraph.maximum_matching()
         num_altruists_in_matching = 0
@@ -203,3 +207,29 @@ class Market:
         self.update(added_pairs=new_participants, matched_pairs=matches, altruists=new_altruists)
         self.num_added = len(new_participants)
 
+    def get_adj_list(self):
+        """
+        Creates an adjacency list of all the participants in the market
+        Each patient-donor pair is represented with their unique id_num
+        :return: a dictionary where the id_nums are keys and the values are
+        the id_nums of the patients that the donor points to and a dictionary of
+        all the pair id and their pairs
+        """
+        adj_list = {}
+        pair_dict = {}
+        for pair in self.participants:
+            neigh_list = list()
+            for patient in pair[1].neighbours:
+                neigh_list.append(patient.id_num)
+            adj_list[pair[1].id_num] = neigh_list
+            pair_dict[pair[1].id_num] = pair
+        return adj_list, pair_dict
+
+    def get_alt_list(self):
+        """
+        :return: a list of the id_nums of all altruists
+        """
+        alt_list = list()
+        for alt in self.altruists:
+            alt_list.append(alt[1].id_num)
+        return alt_list

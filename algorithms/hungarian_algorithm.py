@@ -1,6 +1,6 @@
 
 """
-Implementation of the hungarian algorithm. Modified from https://gist.github.com/KartikTalwar/3158534
+Implementation of the hungarian algorithms. Modified from https://gist.github.com/KartikTalwar/3158534
 """
 
 
