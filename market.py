@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import numpy as np
-from config import PERIOD_LENGTH, PERISH
+from config import PERIOD_LENGTH, PERISH, WEIGHTS
 import algorithms.max_matching as mm
 import market_metrics as met
 
@@ -44,14 +44,20 @@ class Market:
             for p in self.participants:
                 if p.recipient and participant.compatible(p) and (not participant.partner == p):
                     participant.add_neighbour(p)
+                    weight = p.weight
+                    if WEIGHTS == "KPD":
+                        weight = calculate_kpd_weight(donor=participant, recipient=p)
                     # weight is determined by the recipient when determining who to match
-                    self.graph.add_weighted_edges_from([(participant, p, p.weight)])
+                    self.graph.add_weighted_edges_from([(participant, p, weight)])
         else:
             for p in self.participants:
                 if p.donor and participant.compatible(p) and (not participant.partner == p):
                     p.add_neighbour(participant)
+                    weight = participant.weight
+                    if WEIGHTS == "KPD":
+                        weight = calculate_kpd_weight(donor=p, recipient=participant)
                     # weight is determined by the recipient when determining who to match
-                    self.graph.add_weighted_edges_from([(p, participant, participant.weight)])
+                    self.graph.add_weighted_edges_from([(p, participant, weight)])
 
     def add_node_to_graph(self, participant):
         """
@@ -176,6 +182,8 @@ class Market:
         """
         for p in self.participants:
             p.time_in_market = p.time_in_market + PERIOD_LENGTH
+            if p.recipient:
+                p.dialysis_days = p.dialysis_days + 30 * PERIOD_LENGTH
         if PERISH:
             self.remove_perished()
         for pair in added_pairs:
@@ -217,12 +225,13 @@ class Market:
         """
         adj_list = {}
         pair_dict = {}
-        for pair in self.participants:
-            neigh_list = list()
-            for patient in pair[1].neighbours:
-                neigh_list.append(patient.id_num)
-            adj_list[pair[1].id_num] = neigh_list
-            pair_dict[pair[1].id_num] = pair
+        for participant in self.participants:
+            if participant.donor:
+                neigh_list = list()
+                for patient in participant.neighbours:
+                    neigh_list.append(patient.id_num)
+                adj_list[participant.id_num] = neigh_list
+                pair_dict[participant.id_num] = participant
         return adj_list, pair_dict
 
     def get_alt_list(self):
@@ -233,3 +242,29 @@ class Market:
         for alt in self.altruists:
             alt_list.append(alt[1].id_num)
         return alt_list
+
+
+def calculate_kpd_weight(donor, recipient):
+        """
+        calculates the weight of the edge connecting the donor to the recipient
+        this is the weight that the current canadian KPD program uses
+        :param donor: a participant object
+        :param recipient: a recipient object
+        :return: the weight as an float
+        """
+        weight = 100
+        if recipient.cpra >= 0.80:
+            weight += 125
+        if recipient.age <= 18:
+            weight += 75
+        if recipient.province == donor.province:
+            weight += 25
+        if abs(recipient.age - donor.age) <= 30:
+            weight += 5
+        weight += recipient.dialysis_days/30
+
+        if recipient.blood_type == 'O' and donor.blood_type == 'O':
+            weight += 75
+        elif donor.blood_type == recipient.blood_type:
+            weight += 5
+        return weight

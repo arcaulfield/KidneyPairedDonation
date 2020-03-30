@@ -1,6 +1,6 @@
 from participant import Participant
 import numpy.random as random
-from config import PER_A, PER_B, PER_AB, PER_O, PER_CPRA, CPRA, TIME_TO_CRITICAL, ALT_WEIGHT, ARRIVAL_RATE
+from config import PER_A, PER_B, PER_AB, PER_O, PER_CPRA, CPRA, TIME_TO_CRITICAL, ALT_WEIGHT, ARRIVAL_RATE, WEIGHTS
 
 
 class Population:
@@ -23,7 +23,9 @@ class Population:
         new_pairs = list()
         i = 0
         while i < num_pairs:
-            cpra = random.choice(CPRA, p=PER_CPRA)
+            index = random.choice(len(CPRA), p=PER_CPRA)
+            cpra_range = CPRA[index]
+            cpra = random.uniform(cpra_range[0], cpra_range[1])
             donor_type = random.choice(['A', 'B', 'O', 'AB'], p=[PER_A, PER_B, PER_O, PER_AB])
             recipient_type = random.choice(['A', 'B', 'O', 'AB'], p=[PER_A, PER_B, PER_O, PER_AB])
             weight = self.calculate_weight(donor_type, recipient_type, cpra)
@@ -71,6 +73,7 @@ class Population:
         :param cpra: the cpra
         :return: a weight in the form of an int
         """
-        weight = 2
-        return weight
+        if WEIGHTS == "CONST":
+            return 2
+        return 2
 

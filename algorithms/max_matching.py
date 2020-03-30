@@ -19,9 +19,9 @@ class MaxMatching:
 
     def maximum_matching(self):
         if ALGORITHM == "HA":
-            return self.HA_maximum_matching
+            return self.HA_maximum_matching()
         elif ALGORITHM == "LP":
-            return self.LP_maximum_matching
+            return self.LP_maximum_matching()
 
     def HA_maximum_matching(self):
         """
@@ -78,28 +78,28 @@ class MaxMatching:
             for i in range(len(cycle) - 1):
                 pair1 = pair_dict[cycle[i]]
                 pair2 = pair_dict[cycle[i+1]]
-                edge1 = (pair1[0], pair1[1])
-                edge2 = (pair1[1], pair2[0])
+                edge1 = (pair1.partner, pair1)
+                edge2 = (pair1, pair2.partner)
                 edges.add(edge1)
                 edges.add(edge2)
             pair1 = pair_dict[cycle[(len(cycle) - 1)]]
             pair2 = pair_dict[cycle[0]]
-            edge1 = (pair1[0], pair1[1])
-            edge2 = (pair1[1], pair2[0])
+            edge1 = (pair1.partner, pair1)
+            edge2 = (pair1, pair2.partner)
             edges.add(edge1)
             edges.add(edge2)
         for chain in chains:
             for i in range(len(chain) - 1):
                 pair1 = pair_dict[chain[i]]
                 pair2 = pair_dict[chain[i + 1]]
-                edge1 = (pair1[0], pair1[1])
-                edge2 = (pair1[1], pair2[0])
+                edge1 = (pair1.partner, pair1)
+                edge2 = (pair1, pair2.partner)
                 edges.add(edge1)
                 edges.add(edge2)
             pair1 = pair_dict[chain[(len(chain) - 1)]]
             pair2 = pair_dict[chain[0]]
-            edge1 = (pair1[0], pair1[1])
-            edge2 = (pair1[1], pair2[0])
+            edge1 = (pair1.partner, pair1)
+            edge2 = (pair1, pair2.partner)
             edges.add(edge1)
             edges.add(edge2)
         return edges

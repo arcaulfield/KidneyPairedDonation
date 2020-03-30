@@ -33,8 +33,14 @@ class Participant:
             this is only important for the recipient
         weight: float
             the weight given to the outgoing edge of this participant
+        province: string
+            the province that the participant lives in
+        age: int
+            the age of the participant
+        dialysis_days: int
+            the number of days that the participant has been on dialysis
         """
-    def __init__(self, id_num, blood_type, donor, recipient, time_to_critical, weight, cpra=0):
+    def __init__(self, id_num, blood_type, donor, recipient, time_to_critical, weight, cpra=0, province='QB', age=30, dialysis_days = 30):
         self.id_num = id_num
         self.blood_type = blood_type
         self.partner = None
@@ -45,6 +51,9 @@ class Participant:
         self.time_to_critical = time_to_critical
         self.weight = weight
         self.cpra = cpra
+        self.province = province
+        self.age = age
+        self.dialysis_days = dialysis_days
 
     def add_neighbour(self, neighbour):
         """
