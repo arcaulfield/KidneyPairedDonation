@@ -2,6 +2,7 @@ from market import Market
 from population import Population
 from config import START_SIZE, NUM_PERIODS, ARRIVAL_RATE
 import testaltruists as ta
+import testweights as tw
 
 
 class Simulations:
@@ -17,11 +18,11 @@ class Simulations:
     market: Market
         the kidney exchange market that we run simulations on
     """
-    def __init__(self, altruists, per_period):
-        self.population = Population()
+    def __init__(self, altruists, per_period, weights=None, run_num=-1):
+        self.population = Population(weights=weights)
         self.altruists = altruists
         self.per_period = per_period
-        self.market = Market(self.population.generate_pairs(START_SIZE), self.altruists, self.per_period)
+        self.market = Market(self.population.generate_pairs(START_SIZE), self.altruists, self.per_period, weights, run_num)
 
     def run(self):
         """
@@ -41,4 +42,5 @@ class Simulations:
 
 
 if __name__ == '__main__':
-    ta.test_altruists()
+    #ta.test_altruists()
+    tw.test_weights()

@@ -47,7 +47,7 @@ class MaxMatching:
             return edges
         matrix = (nx.adjacency_matrix(new_graph)).todense().tolist()
         for n in range(len(matrix)):
-            matrix[n] = [-1000 if x == 0 else x for x in matrix[n]]
+            matrix[n] = [-100000 if x == 0 else x for x in matrix[n]]
         # give a score of 1 between pairs
         for n in range(int(len(matrix) / 2)):
             matrix[(n * 2) + 1][(n*2)] = 1

@@ -24,14 +24,15 @@ class Market:
         a list of all the altruists in the market
     """
 
-    def __init__(self, pairs, num_altruists, per_period):
+    def __init__(self, pairs, num_altruists, per_period, weights=None, run_num=-1):
         self.graph = nx.DiGraph()
         self.participants = list()
-        self.metrics = met.Metrics(num_altruists=num_altruists, per_period=per_period)
+        self.metrics = met.Metrics(num_altruists=num_altruists, per_period=per_period, weights=weights, run_num=run_num)
         for (recipient, donor) in pairs:
             self.add_pair((recipient, donor))
         self.altruists = list()
         self.num_added = 0
+        self.total_wait_time = 0
 
     def add_participant(self, participant):
         """
@@ -189,6 +190,7 @@ class Market:
         for pair in added_pairs:
             self.add_pair(pair)
         for pair in matched_pairs:
+            self.total_wait_time = self.total_wait_time + pair[0].time_in_market
             self.remove_participant(pair[0])
             self.remove_participant(pair[1])
             if pair in altruists:
@@ -211,7 +213,7 @@ class Market:
         for match in matches:
             if match[1].blood_type == 'X':
                 num_altruists_in_matching += 1
-        self.metrics.update_table(num_matches=len(matches), num_participants=len(self.participants), num_added=self.num_added, num_altruists_in_market=len(self.altruists), num_altruists_in_matching=num_altruists_in_matching)
+        self.metrics.update_table(num_matches=len(matches), num_participants=len(self.participants), num_added=self.num_added, num_altruists_in_market=len(self.altruists), num_altruists_in_matching=num_altruists_in_matching, total_wait_time=self.total_wait_time)
         self.update(added_pairs=new_participants, matched_pairs=matches, altruists=new_altruists)
         self.num_added = len(new_participants)
 
@@ -267,4 +269,4 @@ def calculate_kpd_weight(donor, recipient):
             weight += 75
         elif donor.blood_type == recipient.blood_type:
             weight += 5
-        return weight
+        return int(weight)

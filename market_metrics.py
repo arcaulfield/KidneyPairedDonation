@@ -1,6 +1,6 @@
 import xlsxwriter
 import os
-from config import RESULTS_PATH, CPRA, ALGORITHM
+from config import RESULTS_PATH, CPRA, ALGORITHM, WEIGHTS
 
 
 class Metrics:
@@ -8,7 +8,7 @@ class Metrics:
     Stores all the metrics to track a market. Has all the functionality necessary for writing to excel files.
     In particular, writes to tables based on results.
     """
-    def __init__(self, num_altruists, per_period):
+    def __init__(self, num_altruists, per_period, weights=None, run_num=-1):
         self.num_altruists = num_altruists
         self.per_period = per_period
         self.donor_o_patient_o = 0
@@ -31,16 +31,18 @@ class Metrics:
         self.cpra_2 = 0
         self.cpra_3 = 0
         self.cpra_4 = 0
+        self.cpra_5 = 0
         self.total_num_perished = 0
         self.total_num_matched = 0
         self.total_num_participants = 0
         self.period_num = 0
         # self.market = market
         # Create an new Excel file and add a worksheet.
-        results_file_path = os.path.join(RESULTS_PATH, ALGORITHM + str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods.xlsx")
+        results_file_path = os.path.join(RESULTS_PATH, ("" if run_num == -1 else ("RN" + str(run_num))) + "Weights" + WEIGHTS + ALGORITHM + str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods.xlsx")
         self.workbook = xlsxwriter.Workbook(results_file_path)
         self.worksheet = self.workbook.add_worksheet()
         self.initialize_table()
+        self.weights = weights
 
     def update_blood_type_composition(self, pair, remove):
         """
@@ -106,12 +108,14 @@ class Metrics:
             var = 1
         if pair[0].cpra == 0:
             self.cpra_1 += var
-        elif pair[0].cpra == 0.25:
+        elif pair[0].cpra <= CPRA[1][1]:
             self.cpra_2 += var
-        elif pair[0].cpra == 0.75:
+        elif pair[0].cpra <= CPRA[2][1]:
             self.cpra_3 += var
-        elif pair[0].cpra == 0.97:
-            self.cpra_4 +=var
+        elif pair[0].cpra <= CPRA[3][1]:
+            self.cpra_4 += var
+        else:
+            self.cpra_5 += var
 
     def initialize_table(self):
         # Widen the first column to make the text clearer.
@@ -147,10 +151,12 @@ class Metrics:
         self.worksheet.write('W1', 'Current # CPRA: ' + str(CPRA[1]), bold)
         self.worksheet.write('X1', 'Current # CPRA: ' + str(CPRA[2]), bold)
         self.worksheet.write('Y1', 'Current # CPRA: ' + str(CPRA[3]), bold)
-        self.worksheet.write('Z1', 'Num Altruists in Market', bold)
-        self.worksheet.write('AA1', 'Num Altruists in Matching', bold)
+        self.worksheet.write('Z1', 'Current # CPRA: ' + str(CPRA[4]), bold)
+        self.worksheet.write('AA1', 'Num Altruists in Market', bold)
+        self.worksheet.write('AB1', 'Num Altruists in Matching', bold)
+        self.worksheet.write('AC1', 'Total Wait Time (periods)', bold)
 
-    def update_table(self, num_matches, num_participants, num_added, num_altruists_in_market, num_altruists_in_matching):
+    def update_table(self, num_matches, num_participants, num_added, num_altruists_in_market, num_altruists_in_matching, total_wait_time):
         self.period_num = self.period_num + 1
         # Add a bold format to use to highlight cells.
         self.total_num_matched = self.total_num_matched + num_matches
@@ -184,8 +190,21 @@ class Metrics:
         self.worksheet.write(self.period_num, 22, self.cpra_2)
         self.worksheet.write(self.period_num, 23, self.cpra_3)
         self.worksheet.write(self.period_num, 24, self.cpra_4)
-        self.worksheet.write(self.period_num, 25, num_altruists_in_market)
-        self.worksheet.write(self.period_num, 26, num_altruists_in_matching)
+        self.worksheet.write(self.period_num, 25, self.cpra_5)
+        self.worksheet.write(self.period_num, 26, num_altruists_in_market)
+        self.worksheet.write(self.period_num, 27, num_altruists_in_matching)
+        self.worksheet.write(self.period_num, 28, total_wait_time)
+        if self.weights is not None:
+            self.update_proportions(num_participants/2 - num_altruists_in_market)
+
+    def update_proportions(self, participants_in_market):
+        if self.weights.first_flag:
+            self.weights.set_init_proportions(self.cpra_1 / participants_in_market, self.cpra_2 / participants_in_market,
+                                            self.cpra_3 / participants_in_market, self.cpra_4 / participants_in_market,
+                                            self.cpra_5 / participants_in_market)
+        self.weights.update_proportions(self.cpra_1/participants_in_market, self.cpra_2/participants_in_market,
+                                        self.cpra_3/participants_in_market, self.cpra_4/participants_in_market,
+                                        self.cpra_5/participants_in_market)
 
     def close_table(self):
         self.workbook.close()
