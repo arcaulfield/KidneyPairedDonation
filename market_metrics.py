@@ -8,7 +8,7 @@ class Metrics:
     Stores all the metrics to track a market. Has all the functionality necessary for writing to excel files.
     In particular, writes to tables based on results.
     """
-    def __init__(self, num_altruists, per_period, weights=None, run_num=-1):
+    def __init__(self, num_altruists, per_period, max_cycle_path_size, weights=None, run_num=-1):
         self.num_altruists = num_altruists
         self.per_period = per_period
         self.donor_o_patient_o = 0
@@ -38,7 +38,7 @@ class Metrics:
         self.period_num = 0
         # self.market = market
         # Create an new Excel file and add a worksheet.
-        results_file_path = os.path.join(RESULTS_PATH, ("" if run_num == -1 else ("RN" + str(run_num))) + "Weights" + WEIGHTS + ALGORITHM + str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods.xlsx")
+        results_file_path = os.path.join(RESULTS_PATH, ("" if run_num == -1 else ("RN" + str(run_num))) + "Weights" + WEIGHTS + ALGORITHM + str(self.num_altruists) + "AltruistsPer" + str(self.per_period) + "Periods" + str(max_cycle_path_size) + "CS.xlsx")
         self.workbook = xlsxwriter.Workbook(results_file_path)
         self.worksheet = self.workbook.add_worksheet()
         self.initialize_table()
@@ -155,8 +155,21 @@ class Metrics:
         self.worksheet.write('AA1', 'Num Altruists in Market', bold)
         self.worksheet.write('AB1', 'Num Altruists in Matching', bold)
         self.worksheet.write('AC1', 'Total Wait Time (periods)', bold)
+        self.worksheet.write('AD1', 'Median Wait Time', bold)
+        if ALGORITHM == 'LP' or ALGORITHM == 'FAST':
+            self.worksheet.write('AE1', '# 2 cycles', bold)
+            self.worksheet.write('AF1', '# 3 cycles', bold)
+            self.worksheet.write('AG1', '# 4 cycles', bold)
+            self.worksheet.write('AH1', '# 5 cycles', bold)
+            self.worksheet.write('AI1', '# 6+ cycles', bold)
+            self.worksheet.write('AJ1', '# 2 paths', bold)
+            self.worksheet.write('AK1', '# 3 paths', bold)
+            self.worksheet.write('AL1', '# 4 paths', bold)
+            self.worksheet.write('AM1', '# 5 paths', bold)
+            self.worksheet.write('AN1', '# 6+ paths', bold)
 
-    def update_table(self, num_matches, num_participants, num_added, num_altruists_in_market, num_altruists_in_matching, total_wait_time):
+
+    def update_table(self, num_matches, num_participants, num_added, num_altruists_in_market, num_altruists_in_matching, total_wait_time, median_wait_time, cycle_lengths= None, wait_times=None):
         self.period_num = self.period_num + 1
         # Add a bold format to use to highlight cells.
         self.total_num_matched = self.total_num_matched + num_matches
@@ -194,8 +207,22 @@ class Metrics:
         self.worksheet.write(self.period_num, 26, num_altruists_in_market)
         self.worksheet.write(self.period_num, 27, num_altruists_in_matching)
         self.worksheet.write(self.period_num, 28, total_wait_time)
+        self.worksheet.write(self.period_num, 29, median_wait_time)
+        if cycle_lengths is not None:
+            self.worksheet.write(self.period_num, 30, cycle_lengths[0][0])
+            self.worksheet.write(self.period_num, 31, cycle_lengths[0][1])
+            self.worksheet.write(self.period_num, 32, cycle_lengths[0][2])
+            self.worksheet.write(self.period_num, 33, cycle_lengths[0][3])
+            self.worksheet.write(self.period_num, 34, cycle_lengths[0][4])
+            self.worksheet.write(self.period_num, 35, cycle_lengths[1][0])
+            self.worksheet.write(self.period_num, 36, cycle_lengths[1][1])
+            self.worksheet.write(self.period_num, 37, cycle_lengths[1][2])
+            self.worksheet.write(self.period_num, 38, cycle_lengths[1][3])
+            self.worksheet.write(self.period_num, 39, cycle_lengths[1][4])
         if self.weights is not None:
             self.update_proportions(num_participants/2 - num_altruists_in_market)
+        if wait_times is not None:
+            self.worksheet.write(self.period_num, 40, wait_times)
 
     def update_proportions(self, participants_in_market):
         if self.weights.first_flag:

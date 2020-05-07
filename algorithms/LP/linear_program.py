@@ -60,7 +60,7 @@ def all_cycles(cycles, path, node, tovisit, adj,K):
 # K - maximumsize for cycles length
 # OUTPUT
 # cycles - set of tuples of size K
-def get_all_cycles(adj,K):
+def get_all_cycles(adj,K, weights):
     tovisit = set(adj.keys())
     visited = set([])
     cycles = set([])
@@ -69,7 +69,15 @@ def get_all_cycles(adj,K):
         tmpvisit.remove(i)
         first = i
         all_cycles(cycles,[],first,tmpvisit,adj,K)
-    return cycles
+    # find the weight of each cycle
+    cweights = list()
+    for cycle in cycles:
+        cycle_weight_sum = 0
+        for i in range(len(cycle) - 1):
+            cycle_weight_sum += weights[(cycle[i],cycle[i+1])]
+        cycle_weight_sum += weights[(cycle[i + 1],cycle[0])]
+        cweights.append(cycle_weight_sum)
+    return cycles, cweights
 
 from gurobipy import *
 # INPUT
@@ -83,14 +91,18 @@ from gurobipy import *
 # model
 # variables X
 # variables Z
-def solve_KEP(G,K,L=0,altruistic_list=[]):
+# weights is a matrix of edge weights
+def solve_KEP(G,K,L=0,altruistic_list=[], weights={}):
     setParam("OutputFlag", 0)
     # compute all cycles of length at most 3
-    Cycles_k = list(get_all_cycles(G,K))
+    cycles, cweights = get_all_cycles(G,K,weights)
+    Cycles_k = list(cycles)
+
     # create model
     m = Model("Deterministic KEP")
     # create the variables associated with cycles
-    X = {i+1: m.addVar(obj = len(c), vtype="B",name="X"+str(i+1)) for i,c in enumerate(Cycles_k)}
+    # OBJ needs to be the total weight of the cycle
+    X = {i+1: m.addVar(obj=cweights[i], vtype="B",name="X"+str(i+1)) for i,c in enumerate(Cycles_k)}
     m.update()
     # to understand the dictionary below see how chains can be considered in "Position-Indexed Formulations for Kidney Exchange"
     K_dic = {(i,j):[1] if i in altruistic_list else range(2,L+1) for i in G.keys() for j in G[i]}

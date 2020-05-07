@@ -4,6 +4,7 @@ import numpy as np
 from config import PERIOD_LENGTH, PERISH, WEIGHTS
 import algorithms.max_matching as mm
 import market_metrics as met
+import statistics
 
 
 
@@ -24,15 +25,17 @@ class Market:
         a list of all the altruists in the market
     """
 
-    def __init__(self, pairs, num_altruists, per_period, weights=None, run_num=-1):
+    def __init__(self, pairs, num_altruists, per_period, weights=None, run_num=-1, max_cycle_path_size=3):
         self.graph = nx.DiGraph()
         self.participants = list()
-        self.metrics = met.Metrics(num_altruists=num_altruists, per_period=per_period, weights=weights, run_num=run_num)
+        self.metrics = met.Metrics(num_altruists=num_altruists, per_period=per_period, weights=weights, run_num=run_num, max_cycle_path_size=max_cycle_path_size)
         for (recipient, donor) in pairs:
             self.add_pair((recipient, donor))
         self.altruists = list()
         self.num_added = 0
         self.total_wait_time = 0
+        self.wait_times = list()
+        self.max_cycle_size = max_cycle_path_size
 
     def add_participant(self, participant):
         """
@@ -84,13 +87,13 @@ class Market:
             self.metrics.update_blood_type_composition((participant.partner, participant), remove=True)
             self.metrics.update_cpra_composition((participant.partner, participant), remove=True)
             for p in self.participants:
-                if p.recipient and p.compatible(participant):
+                if p.recipient:
                     participant.remove_neighbour(p)
             if (participant.partner, participant) in self.altruists:
                 self.altruists.remove((participant.partner, participant))
         else:
             for p in self.participants:
-                if p.donor and participant.compatible(p):
+                if p.donor:
                     p.remove_neighbour(participant)
             if (participant, participant.partner) in self.altruists:
                 self.altruists.remove((participant, participant.partner))
@@ -136,7 +139,7 @@ class Market:
         self.metrics.update_blood_type_composition(pair, remove=False)
         self.metrics.update_cpra_composition(pair, remove=False)
 
-    def get_adj_list(self):
+    def get_adj_list2(self):
         """
         gets the adjacency matrix of the bipartite graph of this market
         :return: the adjacency matrix
@@ -190,7 +193,9 @@ class Market:
         for pair in added_pairs:
             self.add_pair(pair)
         for pair in matched_pairs:
-            self.total_wait_time = self.total_wait_time + pair[0].time_in_market
+            if pair[0].recipient:
+                self.wait_times.append(pair[0].time_in_market)
+                self.total_wait_time = self.total_wait_time + pair[0].time_in_market
             self.remove_participant(pair[0])
             self.remove_participant(pair[1])
             if pair in altruists:
@@ -206,14 +211,20 @@ class Market:
         :param new_participants: the new agents to add to the market at the end of the matching
         """
         # Run matching algorithms
-        bigraph = mm.MaxMatching(self)
+        bigraph = mm.MaxMatching(self, max_cycle_path_size=self.max_cycle_size)
         matches = bigraph.maximum_matching()
+        cycle_path_lengths = bigraph.cycle_lengths
         num_altruists_in_matching = 0
         # Count how many altruists are in the matching
         for match in matches:
             if match[1].blood_type == 'X':
                 num_altruists_in_matching += 1
-        self.metrics.update_table(num_matches=len(matches), num_participants=len(self.participants), num_added=self.num_added, num_altruists_in_market=len(self.altruists), num_altruists_in_matching=num_altruists_in_matching, total_wait_time=self.total_wait_time)
+        median = 0
+        if len(self.wait_times) > 0:
+            median = statistics.median(self.wait_times)
+            print("THE median is " + str(median))
+            print(self.wait_times)
+        self.metrics.update_table(num_matches=(len(matches)/2 - num_altruists_in_matching), num_participants=len(self.participants), num_added=self.num_added, num_altruists_in_market=len(self.altruists), num_altruists_in_matching=num_altruists_in_matching, total_wait_time=self.total_wait_time, median_wait_time=median, cycle_lengths=cycle_path_lengths, wait_times=self.wait_times)
         self.update(added_pairs=new_participants, matched_pairs=matches, altruists=new_altruists)
         self.num_added = len(new_participants)
 
@@ -225,16 +236,26 @@ class Market:
         the id_nums of the patients that the donor points to and a dictionary of
         all the pair id and their pairs
         """
+        # pairs are the keys
+        weights_list = {}
         adj_list = {}
         pair_dict = {}
+        vertex_list = list()
         for participant in self.participants:
             if participant.donor:
                 neigh_list = list()
                 for patient in participant.neighbours:
                     neigh_list.append(patient.id_num)
+                    if WEIGHTS == 'KPD':
+                        weight = calculate_kpd_weight(participant, patient)
+                    else:
+                        weight = patient.weight
+                    weights_list[(participant.id_num, patient.id_num)] = weight
                 adj_list[participant.id_num] = neigh_list
                 pair_dict[participant.id_num] = participant
-        return adj_list, pair_dict
+            if participant.id_num not in vertex_list:
+                vertex_list.append(participant.id_num)
+        return adj_list, pair_dict, weights_list, vertex_list
 
     def get_alt_list(self):
         """
@@ -254,6 +275,8 @@ def calculate_kpd_weight(donor, recipient):
         :param recipient: a recipient object
         :return: the weight as an float
         """
+        if recipient.blood_type == 'X':
+            return 0
         weight = 100
         if recipient.cpra >= 0.80:
             weight += 125
@@ -264,9 +287,9 @@ def calculate_kpd_weight(donor, recipient):
         if abs(recipient.age - donor.age) <= 30:
             weight += 5
         weight += recipient.dialysis_days/30
-
         if recipient.blood_type == 'O' and donor.blood_type == 'O':
             weight += 75
         elif donor.blood_type == recipient.blood_type:
             weight += 5
         return int(weight)
+

@@ -3,6 +3,7 @@ from population import Population
 from config import START_SIZE, NUM_PERIODS, ARRIVAL_RATE
 import testaltruists as ta
 import testweights as tw
+import testcyclesize as tcs
 
 
 class Simulations:
@@ -18,11 +19,11 @@ class Simulations:
     market: Market
         the kidney exchange market that we run simulations on
     """
-    def __init__(self, altruists, per_period, weights=None, run_num=-1):
+    def __init__(self, altruists, per_period, weights=None, run_num=-1, max_cycle_size=3):
         self.population = Population(weights=weights)
         self.altruists = altruists
         self.per_period = per_period
-        self.market = Market(self.population.generate_pairs(START_SIZE), self.altruists, self.per_period, weights, run_num)
+        self.market = Market(self.population.generate_pairs(START_SIZE), self.altruists, self.per_period, weights, run_num, max_cycle_path_size=max_cycle_size)
 
     def run(self):
         """
@@ -43,4 +44,5 @@ class Simulations:
 
 if __name__ == '__main__':
     #ta.test_altruists()
-    tw.test_weights()
+    #tw.test_weights()
+    tcs.test_cycle_sizes()

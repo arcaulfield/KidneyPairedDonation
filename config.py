@@ -55,12 +55,13 @@ START_SIZE = 100
 # kpd period length is 4 months
 PERIOD_LENGTH = 4
 # standard number of matching periods is 100
-NUM_PERIODS =5
+NUM_PERIODS =10
 
 # matching algorithm used
-# either 'HA' for hungarian algorithm (doesn't restrict cycle size) or 'LP' for linear program
-ALGORITHM = "HA"
+# either 'HA' for hungarian algorithm (doesn't restrict cycle size) or 'LP' for linear program or 'FAST' for faster cycle
+ALGORITHM = "FAST"
 
 # edge weights used
 # either 'KPD' for the current Canadian KPD weights, 'OPT' for the optimized weights, 'CONST' for constant weights
-WEIGHTS = "OPT"
+WEIGHTS = "KPD"
+

@@ -22,7 +22,7 @@ class Population:
         self.dialysis_days = np.load(dialysis_days_file_path)
         self.donor_ages = np.load(donor_ages_file_path)
         self.patient_ages = np.load(patient_ages_file_path)
-
+        random.seed(0)
         self.weights = weights
 
 
@@ -96,16 +96,32 @@ class Population:
         if WEIGHTS == "CONST":
             return 2
         elif WEIGHTS == "OPT":
-            assert self.weights is not None
-            if cpra == CPRA[0][1]:
-                return self.weights.w_cpra1
-            elif cpra <= CPRA[1][1]:
-                return self.weights.w_cpra2
-            elif cpra <= CPRA[2][1]:
-                return self.weights.w_cpra3
-            elif cpra <= CPRA[3][1]:
-                return self.weights.w_cpra4
-            elif cpra <= CPRA[4][1]:
-                return self.weights.w_cpra5
+            if self.weights is not None:
+                if cpra == CPRA[0][1]:
+                    return self.weights.w_cpra1
+                elif cpra <= CPRA[1][1]:
+                    return self.weights.w_cpra2
+                elif cpra <= CPRA[2][1]:
+                    return self.weights.w_cpra3
+                elif cpra <= CPRA[3][1]:
+                    return self.weights.w_cpra4
+                elif cpra <= CPRA[4][1]:
+                    return self.weights.w_cpra5
+            else:
+                const = 1
+                if recipient_type == 'O':
+                    const = 5
+                if donor_type == 'AB':
+                    const = 2
+                if cpra == CPRA[0][1]:
+                    return const*2
+                elif cpra <= CPRA[1][1]:
+                    return const*4
+                elif cpra <= CPRA[2][1]:
+                    return const*10
+                elif cpra <= CPRA[3][1]:
+                    return const*15
+                elif cpra <= CPRA[4][1]:
+                    return const*30
         return 2
 

@@ -4,16 +4,15 @@ Has all the functionalities for running tests on the affects of altruists in the
 """
 
 
-def test_altruists():
+def test_cycle_sizes():
     # print("Starting Simulations with 0 altruists")
     # sim = Simulations(altruists=0, per_period=1)
     # sim.run()
     for i in [5]:
-        for j in [1]:
-            print("Starting Simulations with " + str(i) + " altruists every " + str(j) + " periods")
-            sim = s.Simulations(altruists=i, per_period=j)
-            sim.run()
+        print("Starting Simulations with " + str(i) + " cycles ")
+        sim = s.Simulations(altruists=5, per_period=1, max_cycle_size=i)
+        sim.run()
 
 
 if __name__ == '__main__':
-    test_altruists()
+    test_cycle_sizes()
