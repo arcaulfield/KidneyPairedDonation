@@ -20,3 +20,20 @@ Outcomes measured by the tests include:
 - the composition of the population
 - the time patients wait in the market before they receive a time
 
+## How to run the simulator
+### Training weights
+
+### Setting parameters
+1. specify parameters desired to be used in `config.py`. Some important parameters to note:
+    - `cycle_cap` and `chain_cap` are the maximum lengths of cycles and chains allowed by the matching algorithm.
+    - `ARRIVAL_RATE` and `START_SIZE`
+    - `WEIGHTS` is the weights used by the matching algorithm. Currently, there are three supported weighting schemes. `"KPD"` mimics the current Canadian KPD program, `"OPT"` uses the weights specified in variables `CPRA1` through `CPRA5` (see note below to understand how who these weights are assigned to), and `"CONST"` for constant weights (all participants recieve the same weight).
+    - `ALGORITHM`
+    
+
+## Directory Structure
+
+
+
+
+This project was developed with the help of @linyid.
