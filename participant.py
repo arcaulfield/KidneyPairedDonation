@@ -21,6 +21,8 @@ class Participant:
             True if the node is a donor type
         recipient: boolean
             True if the node is a recipient type
+        altruist: boolean
+            True if the node is a altruist
         neighbours: list<Participant>
             list of all the nodes that can be reached from this node
             if this is a recipient in a patient-donor pair, the only node that can be reached will be the donor
@@ -33,18 +35,30 @@ class Participant:
             this is only important for the recipient
         weight: float
             the weight given to the outgoing edge of this participant
+        province: string
+            the province that the participant lives in
+        age: int
+            the age of the participant
+        dialysis_days: int
+            the number of days that the participant has been on dialysis
         """
-    def __init__(self, id_num, blood_type, donor, recipient, time_to_critical, weight, cpra=0):
+    def __init__(self, id_num, blood_type, donor, recipient, altruist, time_to_critical, weight, cpra=0, province='QB', age=30, dialysis_days = 30):
+        #random.seed(5)
+        #random_state = random.RandomState()
         self.id_num = id_num
         self.blood_type = blood_type
         self.partner = None
         self.donor = donor
         self.recipient = recipient
+        self.altruist = altruist
         self.neighbours = list()
         self.time_in_market = 0
         self.time_to_critical = time_to_critical
         self.weight = weight
         self.cpra = cpra
+        self.province = province
+        self.age = age
+        self.dialysis_days = dialysis_days
 
     def add_neighbour(self, neighbour):
         """
@@ -62,7 +76,7 @@ class Participant:
         if neighbour in self.neighbours:
             self.neighbours.remove(neighbour)
 
-    def compatible(self, participant):
+    def compatible(self, participant,random_state):
         """
         checks if this Participant is blood-type and tissue-type compatible with the participant
         :param participant: Participant
@@ -72,16 +86,16 @@ class Participant:
             if self.blood_type == 'X' and participant.partner.blood_type == 'X':
                 return False
             elif self.blood_type == 'X':
-                return True
+                return False
             elif self.blood_type == participant.blood_type or self.blood_type == 'AB' or participant.blood_type == 'O':
-                return random.choice([False, True], p=[self.cpra, 1 - self.cpra])
+                return random_state.choice([False, True], p=[self.cpra, 1 - self.cpra])
         else:
             # checks if you are an altruistic donor - altruistic donors can't have dummy nodes as neighbours
             if participant.blood_type == 'X' and self.partner.blood_type == 'X':
                 return False
             elif participant.blood_type == 'X':
-                return True
+                return False
             elif self.blood_type == participant.blood_type or participant.blood_type == 'AB' or self.blood_type == 'O':
-                return random.choice([False, True], p=[participant.cpra, 1 - participant.cpra])
+                return random_state.choice([False, True], p=[participant.cpra, 1 - participant.cpra])
         return False
 
