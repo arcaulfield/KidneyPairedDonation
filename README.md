@@ -37,16 +37,9 @@ Parameters for the similations can be set within `config.py`. Before running any
 9. choose the weight assigned to non-deterministic donours using `ALT_WEIGHT`. 
 10. choose the maximum cycle and chain length that the matching algorithm can use during the simulation with variables `cycle_cap` and `chain_cap`.
 11. indicate the matching algorithm to be used in `ALGORITHM`. Currently, only `"FAST"` is a valid option as it's the only supported algorithm. However, should more algorithms be supported, you can choose them here. The algorithm is implemented in `max_matching.py`.
-
-1. specify parameters desired to be used in `config.py`. Some important parameters to note:
-    - `cycle_cap` and `chain_cap` are the maximum lengths of cycles and chains allowed by the matching algorithm.
-    - `ARRIVAL_RATE` and `START_SIZE`
-    - `WEIGHTS` is the weights used by the matching algorithm. Currently, there are three supported weighting schemes. `"KPD"` mimics the current Canadian KPD program, `"OPT"` uses the weights specified in variables `CPRA1` through `CPRA5` (see note below to understand how who these weights are assigned to), and `"CONST"` for constant weights (all participants recieve the same weight).
-    - `ALGORITHM` is the matching algorithm to be used. Currently, only FAST is a valid option as it's the only supported algorithm. To add more matching algorithms, you can configure it hear. The algorithm is implemented in max_matching.py
-    - `RESULTS_PATH`
-    - `DATA_PATH`
     
 ### Training weights
+Weights can be tried by running the main function in `trainweights.py`. This will run 50 sets of simulations, updating the weights after each simulation based on an update rule that takes into account the rate at which different types of participants changes throughout the simulation. Be sure to set `WEIGHTS="OPT"` before training weights. The trained weights will be output to `weights.txt` in the path specified in `RESULTS_PATH`. To test the impacts of these weights, set `WEIGHTS="OPT"` and update variables `CPRA1` through `CPRA5` with the weights output by training, before running any simulations. You can modify the update rule, by changing the `update_weights` function within `weights.py`.  
 
 ### Running simulations
 Within `testaltruists.py`:
