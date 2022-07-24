@@ -42,10 +42,10 @@ Parameters for the similations can be set within `config.py`. Before running any
 Weights can be tried by running the main function in `trainweights.py`. This will run 50 sets of simulations, updating the weights after each simulation based on an update rule that takes into account the rate at which different types of participants changes throughout the simulation. Be sure to set `WEIGHTS="OPT"` before training weights. The trained weights will be output to `weights.txt` in the path specified in `RESULTS_PATH`. To test the impacts of these weights, set `WEIGHTS="OPT"` and update variables `CPRA1` through `CPRA5` with the weights output by training, before running any simulations. You can modify the update rule, by changing the `update_weights` function within `weights.py`.  
 
 ### Running simulations
-Within `testaltruists.py`:
-  -  `test_altruists_with_seeds()` will rerun the tests 50 times with 50 different random seeds. It will print out an excel file with only the data at the end of a set of simulations. 
- -   `test_altruists()` will test the affects of having 0 through `NUM_ALTRUISTS` number of altruists.  
-Within `trainweights.py`: 
+`Simulations.py` has contains all functionality need to run simulations and tests can be created that run through different sets of parameters. There are test functions already in place that enable running a set of simulations iterating through different parameters and outputing results, within `testaltruists.py`. There are two key functions:
+ -   `test_altruists()` this will perform `NUM_ALTRUIST` many simulations, one simulation for each of 0 through NUM_ALTRUIST many iterations. 
+ -   `test_altruists_with_seeds()` calls  `test_altruists()` 50 times with 50 different random seeds. It will print out an excel file with only the data at the end of a set of simulations. 
+Currently, the main funciton of `testaltruists.py` will trigger `test_altruists_with_seeds()`.
 
 ## Directory Structure
 
