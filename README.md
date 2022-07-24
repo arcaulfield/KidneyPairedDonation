@@ -21,9 +21,23 @@ Outcomes measured by the tests include:
 - the time patients wait in the market before they receive a time
 
 ## How to run the simulator
-### Training weights
-
 ### Setting parameters
+Parameters for the similations can be set within `config.py`. Before running any tests:
+1. indicate the file path to write result in `RESULTS_PATH`
+2. specify where data will be stored using variable `DATA_PATH`. Add "patient_days_bootstring.npy", "donor_ages_bootstring.npy" and "patient_ages_bootstring.npy" to this folder. These numpy arrays store information on the number of days that a patient has been on dialysis, as well as the ages of the donors and patients respectiely. The data isn't included in this repo for privacy issues. 
+3. indicate the starting population size with `START_SIZE` and the number of patient donor pairs added after each period in `ARRIVAL_RATE`. 
+4. specify the population distribution using variables `PER_A`, `PER_B`, `PER_AB` and `PER_O`, which indicate the percentage of the population with each different blood type, and variables`PER_CPRA` and `CPRA` to indicate the percentage of the population with each different CPRA rate. 
+5. indicate the number of periods used per simulation in `NUM_PERIODS` and the length of time for each period in `PERIOD_LENGHT`.
+6. if you would like participants to leave the market after a specified amount of time, you can set the boolean variable `PERISH` to `True`.
+7. specify the average number of altruists that will enter the market after each period in `NUM_ALTRUISTS`. 
+8. `WEIGHTS` is used to specify the weighting scheme used by the matching algorithm. Currently, the supported schemes are:
+    - `"KPD"`: mimics the current Canadian KPD program
+    - `"OPT"` uses the weights specified in variables `CPRA1` through `CPRA5` (see note below to understand how who these weights are assigned to)
+    - `"CONST"` for constant weights (all participants recieve the same weight)
+9. choose the weight assigned to non-deterministic donours using `ALT_WEIGHT`. 
+10. choose the maximum cycle and chain length that the matching algorithm can use during the simulation with variables `cycle_cap` and `chain_cap`.
+11. indicate the matching algorithm to be used in `ALGORITHM`. Currently, only `"FAST"` is a valid option as it's the only supported algorithm. However, should more algorithms be supported, you can choose them here. The algorithm is implemented in `max_matching.py`.
+
 1. specify parameters desired to be used in `config.py`. Some important parameters to note:
     - `cycle_cap` and `chain_cap` are the maximum lengths of cycles and chains allowed by the matching algorithm.
     - `ARRIVAL_RATE` and `START_SIZE`
@@ -32,6 +46,9 @@ Outcomes measured by the tests include:
     - `RESULTS_PATH`
     - `DATA_PATH`
     
+### Training weights
+
+### Running simulations
 Within `testaltruists.py`:
   -  `test_altruists_with_seeds()` will rerun the tests 50 times with 50 different random seeds. It will print out an excel file with only the data at the end of a set of simulations. 
  -   `test_altruists()` will test the affects of having 0 through `NUM_ALTRUISTS` number of altruists.  
