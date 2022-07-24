@@ -28,12 +28,24 @@ Outcomes measured by the tests include:
     - `cycle_cap` and `chain_cap` are the maximum lengths of cycles and chains allowed by the matching algorithm.
     - `ARRIVAL_RATE` and `START_SIZE`
     - `WEIGHTS` is the weights used by the matching algorithm. Currently, there are three supported weighting schemes. `"KPD"` mimics the current Canadian KPD program, `"OPT"` uses the weights specified in variables `CPRA1` through `CPRA5` (see note below to understand how who these weights are assigned to), and `"CONST"` for constant weights (all participants recieve the same weight).
-    - `ALGORITHM`
+    - `ALGORITHM` is the matching algorithm to be used. Currently, only FAST is a valid option as it's the only supported algorithm. To add more matching algorithms, you can configure it hear. The algorithm is implemented in max_matching.py
+    - `RESULTS_PATH`
+    - `DATA_PATH`
     
+Within `testaltruists.py`:
+  -  `test_altruists_with_seeds()` will rerun the tests 50 times with 50 different random seeds. It will print out an excel file with only the data at the end of a set of simulations. 
+ -   `test_altruists()` will test the affects of having 0 through `NUM_ALTRUISTS` number of altruists.  
+Within `trainweights.py`: 
 
 ## Directory Structure
 
+Simulations works through a set of matching sycles
 
+algorithms/kidney_solver implements the matching algorithm. This repo comes from: https://github.com/jamestrimble/kidney_solver 
+Populaiton manages functionality related to the population
+participant is a participant (either donor, patient or non-deterministic donor)
+market_metrics tracks the market metrics, writing to an excel table 
+algorithms/max_matching.py runs the matching algorithm specified in config.py. Either HA (hungarian algorithm). Note this is unused legacy code and has broken 
 
 
 This project was developed with the help of @linyid.
