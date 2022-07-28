@@ -28,7 +28,7 @@ Parameters for the similations can be set within `config.py`. Before running any
 3. indicate the starting population size with `START_SIZE` and the number of patient-donor pairs added after each period in `ARRIVAL_RATE`. 
 4. specify the population distribution using variables `PER_A`, `PER_B`, `PER_AB` and `PER_O`, which indicate the percentage of the population with each different blood type, and variables`PER_CPRA` and `CPRA` to indicate the percentage of the population with each different CPRA rate. 
 5. indicate the number of periods used per simulation in `NUM_PERIODS` and the length of time for each period in `PERIOD_LENGTH`.
-6. specify the average number of altruists that will enter the market after each period in `NUM_ALTRUISTS`. 
+6. specify the average number of non-deterministic donors that will enter the market after each period in `NUM_ALTRUISTS`. 
 7. `WEIGHTS` specifies the weighting scheme used by the matching algorithm. Currently, the supported schemes are:
     - `"KPD"`: mimics the current Canadian Kidney Paired Donation program
     - `"OPT"` uses the weights specified in variables `CPRA1` through `CPRA5`
@@ -38,11 +38,11 @@ Parameters for the similations can be set within `config.py`. Before running any
 10. indicate the matching algorithm to be used in `ALGORITHM`. Currently, only `"FAST"` is a valid option as it's the only supported algorithm. However, should more algorithms be supported, you can choose them here. The algorithm is implemented in `max_matching.py`.
     
 ### Training weights
-Weights can be tried by running the main function in `trainweights.py`. This will run 50 sets of simulations, updating the weights after each simulation based on an update rule that takes into account the rate at which different types of participants changes throughout the simulation. Be sure to set `WEIGHTS="OPT"` before training weights. The trained weights will be output to `weights.txt` in the path specified in `RESULTS_PATH`. To test the impacts of these weights, set `WEIGHTS="OPT"` and update variables `CPRA1` through `CPRA5` with the weights output by training, before running any simulations. You can modify the update rule, by changing the `update_weights` function within `weights.py`.  
+Weights can be trained by running the main function in `trainweights.py`. This will run 50 sets of simulations, updating the weights after each simulation based on an update rule that takes into account the rate at which different types of participants change throughout the simulation. Be sure to set `WEIGHTS="OPT"` before training weights. The trained weights will be output to `weights.txt` in the path specified in `RESULTS_PATH`. To test the impacts of these weights, set `WEIGHTS="OPT"` and update variables `CPRA1` through `CPRA5` with the weights output by training and then run simulations. You can modify the update rule, by changing the `update_weights` function within `weights.py`.  
 
 ### Running simulations
-`Simulations.py` has contains all functionality need to run simulations and tests can be created that run through different sets of parameters. There are test functions already in place that enable running a set of simulations iterating through different parameters and outputing results, within `testaltruists.py`. There are two key functions:
- -   `test_altruists()` this will perform `NUM_ALTRUIST` many simulations, one simulation for each of 0 through NUM_ALTRUIST many iterations. 
+`Simulations.py` contains all functionality needed to run simulations. Tests that run through different sets of parameters can be created using this class. There are already test functions in place that enable running a set of simulations, which iterate through different parameters, within `testaltruists.py`. There are two key functions:
+ -   `test_altruists()` this will perform `NUM_ALTRUIST` many simulations. It iterates through the different numbers of average non-deterministic donors that enter the market, starting with 0 and finishing with `NUM_ALTRUIST` - 1. 
  -   `test_altruists_with_seeds()` calls  `test_altruists()` 50 times with 50 different random seeds. It will print out an excel file with only the data at the end of a set of simulations. 
 Currently, the main funciton of `testaltruists.py` will trigger `test_altruists_with_seeds()`.
 
