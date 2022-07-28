@@ -9,8 +9,6 @@ from participant import Participant
 import statistics
 
 
-
-
 class Market:
     """
     A kidney paired donation market represented as a bipartite graph
@@ -40,8 +38,6 @@ class Market:
         self.wait_times = list()
         self.max_cycle_size = max_cycle_size
         self.max_path_size = max_path_size
-
-
 
     def run_period(self, new_participants=list(), new_altruists=list(), period_num=-1, seed = -1, test_trial_num = None, trial_table = None):
         """
@@ -110,8 +106,6 @@ class Market:
         print("There remains {} pairs in the market (excluding altruists)".format(len(self.participants)/2))
 
         return cycle_path_lengths
-
-
 
     def add_participant(self, participant):
         """
@@ -189,7 +183,6 @@ class Market:
         if participant in self.graph.nodes():
             self.graph.remove_node(participant)
         self.participants.remove(participant)
-
 
     def draw_market(self):
         if len(self.graph.nodes()) > 0:
@@ -295,7 +288,6 @@ class Market:
         for a in altruists:
             self.add_pair(a)
             self.altruists.append(a)
-
 
     def get_adj_list(self):
         """

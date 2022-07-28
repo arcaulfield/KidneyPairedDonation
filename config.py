@@ -11,7 +11,7 @@ PER_AB = 0.03
 # percentage of the population with blood type O
 PER_O = 0.46
 
-# percertage with each CPRA level  change this!!!!!
+# percertage with each CPRA level
 PER_CPRA = [0.24, 0.29, 0.24, 0.1, 0.13]
 # CPRA levels - note: these represent
 CPRA = [(0, 0), (0.01, 0.50), (0.51, 0.94), (0.95, 0.96), (0.97, 1)]
@@ -61,8 +61,8 @@ PERIOD_LENGTH = 4
 # standard number of matching periods is 100
 NUM_PERIODS = 50
 
-# number of altruists per period. If use random sample, the mean is 4.562
-NUM_ALTRUISTS = 4.562
+# number of altruists per period. If use random sample, the mean is 4
+NUM_ALTRUISTS = 4
 
 # maximum cycle and chain size
 # when using large chain size, set 'ALGORITHM' to be 'FAST' or 'LP'
@@ -78,8 +78,7 @@ LEARNING_RATE = 0.5
 
 
 # matching algorithm used
-# either 'HA' for hungarian algorithm (doesn't restrict cycle size) or 'LP' for linear program or 'FAST' for LP with faster cycle selection
-# make sure that weights used are integer if you run with "HA"
+# 'FAST' for LP with faster cycle selection
 ALGORITHM = "FAST"
 
 # edge weights used

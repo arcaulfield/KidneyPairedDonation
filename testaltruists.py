@@ -1,6 +1,6 @@
 import time
 import simulations as s
-from config import NUM_ALTRUISTS, RESULTS_PATH, CYCLE_CAP, CHAIN_CAP, ALGORITHM, NUM_ALTRUISTS, WEIGHTS
+from config import RESULTS_PATH, CYCLE_CAP, CHAIN_CAP, NUM_ALTRUISTS, WEIGHTS
 import numpy as np
 import xlsxwriter
 import os
@@ -37,18 +37,14 @@ def test_altruists_with_seeds():
     run test_altruists multiple times with different seeds
     :return:
     '''
-    #seeds = [81]
-    #'''
     seeds = [581,  81, 273,  86,  64, 754, 662,   7, 916, 128, 870, 315, 394,
        317,  30, 767, 687, 256, 501, 526, 177, 784, 520, 948, 164, 822,
        913, 895, 537, 171, 254, 552, 297, 822, 288, 445, 247, 618, 327,
        342, 224, 571, 516, 792, 284, 925, 105, 676, 638, 200]
-    #'''
     results_file_path = os.path.join(RESULTS_PATH, "SeedTest_" + str(len(seeds)) + "_" + WEIGHTS + str(NUM_ALTRUISTS) +
             "AltruistsPer" + str(1) + "Periods_" + str(CYCLE_CAP) + "_" + str(CHAIN_CAP) + "_min_150" + ".xlsx")
     workbook = xlsxwriter.Workbook(results_file_path)
     trial_table = workbook.add_worksheet()
-    # random_state = np.random.RandomState()
 
     test_trial_num = 1
     for seed in seeds:
@@ -58,5 +54,5 @@ def test_altruists_with_seeds():
 
 
 if __name__ == '__main__':
-    #test_altruists(307)
+    #test_altruists(207)
     test_altruists_with_seeds()

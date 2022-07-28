@@ -50,7 +50,6 @@ class Weights:
         self.p_cpra4 = [[0.20 for i in range(4)] for j in range(4)]
         self.p_cpra5 = [[0.20 for i in range(4)] for j in range(4)]
 
-
     def print_weights(self,file):
         print("The new weights are: CPRA1 " + str(self.w_cpra1) + " CPRA2 " + str(self.w_cpra2) + " CPRA3 " + str(self.w_cpra3) + " CPRA4 " + str(self.w_cpra4) + " CPRA5 " + str(self.w_cpra5),file=file)
         print()

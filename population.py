@@ -14,7 +14,6 @@ class Population:
     """
 
     def __init__(self, weights=None):
-        #self.random_state = np.random.RandomState()
         self.count = 0
         dialysis_days_file_path = os.path.join(DATA_PATH, "patient_days_bootstring.npy")
         donor_ages_file_path = os.path.join(DATA_PATH, "donor_ages_bootstring.npy")
@@ -25,8 +24,6 @@ class Population:
         self.patient_ages = np.load(patient_ages_file_path)
 
         self.weights = weights
-
-
 
     def generate_pairs(self, num_pairs,first_flag):
         """

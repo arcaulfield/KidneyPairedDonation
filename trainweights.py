@@ -9,7 +9,7 @@ Run with 'OPT' set in the config file
 """
 
 
-def test_weights():
+def train_weights():
     np.random.seed()
 
     file_path = os.path.join(RESULTS_PATH, "weights.txt")
@@ -34,7 +34,5 @@ def test_weights():
     f.close()
 
 
-
-
 if __name__ == '__main__':
-    test_weights()
+    train_weights()

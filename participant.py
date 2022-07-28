@@ -1,6 +1,3 @@
-import numpy.random as random
-
-
 class Participant:
     """
         A participant in a kidney paired donation program
@@ -43,8 +40,6 @@ class Participant:
             the number of days that the participant has been on dialysis
         """
     def __init__(self, id_num, blood_type, donor, recipient, altruist, time_to_critical, weight, cpra=0, province='QB', age=30, dialysis_days = 30):
-        #random.seed(5)
-        #random_state = random.RandomState()
         self.id_num = id_num
         self.blood_type = blood_type
         self.partner = None

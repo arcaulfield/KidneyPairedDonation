@@ -2,9 +2,6 @@ import numpy as np
 from market import Market
 from population import Population
 from config import START_SIZE, NUM_PERIODS, ARRIVAL_RATE, CYCLE_CAP, CHAIN_CAP, RANDOM_SAMPLE
-import testaltruists as ta
-import testweights as tw
-import testcyclesize as tcs
 
 
 class Simulations:
@@ -27,7 +24,7 @@ class Simulations:
     trial_table:
         xslx Worksheet object for seed trial test
     """
-    def __init__(self, altruists, per_period, weights=None, run_num=-1, max_cycle_size=CYCLE_CAP, max_path_size=CHAIN_CAP, test_trial_num=None, trial_table=None, seed_num = None):
+    def __init__(self, altruists, per_period, weights=None, run_num=-1, max_cycle_size=CYCLE_CAP, max_path_size=CHAIN_CAP, test_trial_num=None, trial_table=None, seed_num=None):
         self.random_state = np.random.RandomState()
         self.seed = seed_num
         self.test_trial_num = test_trial_num
@@ -38,7 +35,6 @@ class Simulations:
         self.market = Market(self.population.generate_pairs(START_SIZE,first_flag=True), self.altruists, self.per_period, weights, run_num, max_cycle_size=max_cycle_size, max_path_size=max_path_size)
         self.cycle_chain_matches = [[0,0,0,0,0],[0],[0,0,0,0,0]]
 
-
     def run(self):
         """
         runs the simulations
@@ -47,7 +43,7 @@ class Simulations:
         total_altruists = 0
         for i in range(NUM_PERIODS):
             print("Starting period " + str(i) + " - Trial number" + str(self.test_trial_num))
-            num_pairs = np.random.poisson(ARRIVAL_RATE,None)
+            num_pairs = np.random.poisson(ARRIVAL_RATE, None)
             new_pairs = self.population.generate_pairs(num_pairs, first_flag=False)
             altruists = list()
             if RANDOM_SAMPLE:
@@ -81,9 +77,3 @@ class Simulations:
             self.trial_table.write(self.test_trial_num, 42, self.cycle_chain_matches[2][4])
 
         self.market.metrics.close_table()
-
-
-if __name__ == '__main__':
-    #ta.test_altruists()
-    tw.test_weights()
-    #tcs.test_cycle_sizes()

@@ -1,8 +1,4 @@
-import market as Market
-from algorithms import hungarian_algorithm as HA
-import networkx as nx
 from config import ALGORITHM, PRINT
-from algorithms.LP.linear_program import solve_KEP
 
 import time
 import algorithms.kidney_solver.kidney_digraph as kidney_digraph
@@ -26,121 +22,9 @@ class MaxMatching:
         self.max_cycle_size = max_cycle_size
         self.max_path_size = max_path_size
 
-
     def maximum_matching(self):
-        if ALGORITHM == "HA":
-            return self.HA_maximum_matching()
-        elif ALGORITHM == "LP":
-            return self.LP_maximum_matching()
-        elif ALGORITHM == "FAST":
+        if ALGORITHM == "FAST":
             return self.FAST_maximum_matching()
-
-
-
-    def HA_maximum_matching(self):
-        """
-        finds matching using the hungarian algorithm
-        :return: a set of all the edges in the matching
-        """
-        edges = set()
-        participant_list = self.bigraph.participants.copy()
-        new_graph = self.bigraph.graph.copy()
-        for participant in self.bigraph.participants:
-            if participant.donor and len(participant.neighbours) == 0:
-                to_remove = None
-                for (p1, p2) in new_graph.edges():
-                    if p2 == participant:
-                        to_remove = p1
-                        participant_list.remove(p1)
-                if to_remove is not None:
-                    new_graph.remove_node(to_remove)
-                if participant in new_graph.nodes():
-                    new_graph.remove_node(participant)
-                participant_list.remove(participant)
-        if len(participant_list) == 0:
-            return edges
-        matrix = (nx.adjacency_matrix(new_graph)).todense().tolist()
-        for n in range(len(matrix)):
-            matrix[n] = [-100000 if x == 0 else x for x in matrix[n]]
-        # give a score of 1 between pairs
-        for n in range(int(len(matrix) / 2)):
-            matrix[(n * 2) + 1][(n*2)] = 1
-            matrix[(n * 2)][n * 2 + 1] = 1
-        matching = HA.max_weight_matching(matrix)
-        if matching[2] <= (len(self.bigraph.participants) / 2):
-            return edges
-        else:
-            # identify the participants in the matching
-            for p in matching[0].keys():
-                participant1 = participant_list[p]
-                participant2 = participant_list[matching[0][p]]
-                if not (participant1.partner == participant2):
-                    edge = (participant1, participant2)
-                    edges.add(edge)
-            return edges
-
-    def LP_maximum_matching(self):
-        """
-        finds a matching using a linear program
-        :return: a set of all the edges in the matching
-                 a set of all unmatched donors (that could be future altruists)
-        """
-        G, pair_dict, weights, _ = self.bigraph.get_adj_list()
-        altruist_list = self.bigraph.get_alt_list()
-        print("Altruists in this period:")
-        for altruist in altruist_list:
-            print(str(altruist) + ':', end=" ")
-            print(G[altruist])
-        OPT, cpu_time, _, _, _, chains, cycles = solve_KEP(G, self.max_cycle_size, self.max_path_size, altruist_list, weights=weights)
-        print("-----------------------------------------------------")
-        # Now track all removed pairs
-        edges = set()
-        preserved_donors = set() # preserve the donor of last pair in a chain
-        cycle_path_lengths = ([0, 0, 0, 0, 0], [0])  # number of cycle lengths, and number of matches in chains
-        for chain in chains:
-            for i in range(len(chain)-1):
-                edge1 = chain[i]
-                p1 = pair_dict[edge1[0]]
-                p2 = pair_dict[edge1[1]]  # both p1 and p2 are donor
-                match1 = (p1.partner, p1)
-                match2 = (p1, p2.partner)
-                edges.add(match1)
-                edges.add(match2)
-                cycle_path_lengths[1][0] += 1
-            i = len(chain)-1
-            edge = chain[i]
-            p1 = pair_dict[edge[0]]
-            p2 = pair_dict[edge[1]]  # this is the preserved donor
-            match1 = (p1.partner, p1)
-            match2 = (p1, p2.partner)
-            edges.add(match1)
-            edges.add(match2)
-            preserved_donors.add(p2)
-            match3 = (p2.partner, p2)
-            edges.add(match3)
-            cycle_path_lengths[1][0] += 1
-
-        for cycle in cycles:
-            for i in range(len(cycle) - 1):
-                pair1 = pair_dict[cycle[i]]
-                pair2 = pair_dict[cycle[i+1]]  # both pair1 and pair2 are donors
-                edge1 = (pair1.partner, pair1)  # the 1st edge is the rec. pointing to the donor in the same pair
-                edge2 = (pair1, pair2.partner)
-                edges.add(edge1)
-                edges.add(edge2)
-            pair1 = pair_dict[cycle[(len(cycle) - 1)]]
-            pair2 = pair_dict[cycle[0]]
-            edge1 = (pair1.partner, pair1)
-            edge2 = (pair1, pair2.partner)
-            edges.add(edge1)
-            edges.add(edge2)
-            if len(cycle) > 6:
-                cycle_path_lengths[0][4] += 1
-            else:
-                cycle_path_lengths[0][len(cycle) - 2] += 1
-        self.cycle_lengths = cycle_path_lengths
-        return edges, preserved_donors
-
 
     def FAST_maximum_matching(self):
         """
@@ -190,7 +74,7 @@ class MaxMatching:
 
         start_time = time.time()
         cfg = kidney_ip.OptConfig(d, altruists, self.max_cycle_size, self.max_path_size)
-        opt_solution = solve_kep(cfg, formulation="picef", use_relabelled=False)
+        opt_solution = self.solve_kep(cfg, formulation="picef", use_relabelled=False)
         time_taken = time.time() - start_time
         if (PRINT):
             print("formulation: PICEF")
@@ -264,34 +148,32 @@ class MaxMatching:
         self.cycle_lengths = cycle_path_lengths
         return edges, preserved_donors
 
+    def solve_kep(cfg, formulation, use_relabelled=True):
+        formulations = {
+            "uef": ("Uncapped edge formulation", kidney_ip.optimise_uuef),
+            "eef": ("EEF", kidney_ip.optimise_eef),
+            "eef_full_red": ("EEF with full reduction by cycle generation", kidney_ip.optimise_eef_full_red),
+            "hpief_prime": ("HPIEF'", kidney_ip.optimise_hpief_prime),
+            "hpief_prime_full_red": (
+            "HPIEF' with full reduction by cycle generation", kidney_ip.optimise_hpief_prime_full_red),
+            "hpief_2prime": ("HPIEF''", kidney_ip.optimise_hpief_2prime),
+            "hpief_2prime_full_red": (
+            "HPIEF'' with full reduction by cycle generation", kidney_ip.optimise_hpief_2prime_full_red),
+            "picef": ("PICEF", kidney_ip.optimise_picef),
+            "cf": ("Cycle formulation", kidney_ip.optimise_ccf)
+        }
 
-def solve_kep(cfg, formulation, use_relabelled=True):
-    formulations = {
-        "uef": ("Uncapped edge formulation", kidney_ip.optimise_uuef),
-        "eef": ("EEF", kidney_ip.optimise_eef),
-        "eef_full_red": ("EEF with full reduction by cycle generation", kidney_ip.optimise_eef_full_red),
-        "hpief_prime": ("HPIEF'", kidney_ip.optimise_hpief_prime),
-        "hpief_prime_full_red": (
-        "HPIEF' with full reduction by cycle generation", kidney_ip.optimise_hpief_prime_full_red),
-        "hpief_2prime": ("HPIEF''", kidney_ip.optimise_hpief_2prime),
-        "hpief_2prime_full_red": (
-        "HPIEF'' with full reduction by cycle generation", kidney_ip.optimise_hpief_2prime_full_red),
-        "picef": ("PICEF", kidney_ip.optimise_picef),
-        "cf": ("Cycle formulation",
-               kidney_ip.optimise_ccf)
-    }
-
-    if formulation in formulations:
-        formulation_name, formulation_fun = formulations[formulation]
-        if use_relabelled:
-            opt_result = kidney_ip.optimise_relabelled(formulation_fun, cfg)
+        if formulation in formulations:
+            formulation_name, formulation_fun = formulations[formulation]
+            if use_relabelled:
+                opt_result = kidney_ip.optimise_relabelled(formulation_fun, cfg)
+            else:
+                opt_result = formulation_fun(cfg)
+            kidney_utils.check_validity(opt_result, cfg.digraph, cfg.ndds, cfg.max_cycle, cfg.max_chain)
+            opt_result.formulation_name = formulation_name
+            return opt_result
         else:
-            opt_result = formulation_fun(cfg)
-        kidney_utils.check_validity(opt_result, cfg.digraph, cfg.ndds, cfg.max_cycle, cfg.max_chain)
-        opt_result.formulation_name = formulation_name
-        return opt_result
-    else:
-        raise ValueError("Unrecognised IP formulation name")
+            raise ValueError("Unrecognised IP formulation name")
 
 
 
