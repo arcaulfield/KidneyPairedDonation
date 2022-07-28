@@ -4,7 +4,8 @@ This repository implements a Kidney Paired Donation program simulator, which can
 2. use a matching algorithm to decide the matches to perform
 3. remove matched pairs
 4. generate and add new patient-donor pairs, as well as non-deterministic donors
-The simulator is highly configurable, with multiple different parameters that can be modified. Furthermore, the simulator can be used to learn weights to be assigned to patient-donor pairs to optimize the number of matches. It has the functionality to learn weights based on an update rule that takes as input how the composition of the population of patient-donor pairs changes over the course of the simulations.
+
+The simulator is highly configurable, with multiple different parameters that can be modified. Furthermore, the simulator can be used to learn weights to be assigned to patient-donor pairs in order to optimize the number of matches. It has the functionality to learn weights based on an update rule that takes as input how the composition of the population of patient-donor pairs changes over the course of the simulations.
 
 The parameters that can be modified include: 
 - the percentage of each blood type in the population
